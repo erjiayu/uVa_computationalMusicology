@@ -11,20 +11,68 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### Tame Impala
+### Introduction
 
-```{r cars}
-summary(cars)
+Welcome to my corpus! I will be focusing on the evolution of psychedelic rock, from when it was born in the 1960s to today. Specifically, I will be analyzing the music of Grateful Dead and Tame Impala. 
+
+### Tame Impala: how does energy relate to tempo?
+
+```{r tameimpala1, echo=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(spotifyr)
+library(compmus)
+
+tameImpala <- get_artist_audio_features('tame impala')
+ggplot(tameImpala, aes(x = tempo, y = energy, size = valence, color = album_name)) + geom_point() + ggtitle("Tame Impala Analysis")
+
 ```
 
-*** 
-This diagram shows the ratio of tempo to energy in Tame Impala's albums.
+***
 
-### Jimi Hendrix
+The two graphs portrayed provide some insight into Tame Impala's music. Figure 1 (to the left) analyzes the ratio of tempo to energy in all of his songs, grouped by album and colored in accordingly. 
+-- ADD MORE ANALYSIS -- 
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+### Tame Impala: "The Less I Know The Better" Analysis
+
+``` {r tameImpala2, echo=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(spotifyr)
+library(compmus)
+
+theLessIKnowID <- '6K4t31amVTZDgR3sKmwUJJ'
+
+wood <-
+  get_tidy_audio_analysis(theLessIKnowID) |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+
+wood |>
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
+  compmus_gather_chroma() |> 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c()
 ```
+
+***
+
+This is the chromagram of Tame Impala's biggest hit, "The Less I Know The Better". 
+-- ADD MORE ANALYSIS -- 
 
 ### Grateful Dead
+
+
+### Discussion
 
