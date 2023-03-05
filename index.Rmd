@@ -3,19 +3,22 @@ title: "Computational Musicology: Corpus"
 author: "Tara Yu"
 date: "2/15/2023"
 output: 
-  flexdashboard::flex_dashboard:
-    storyboard: true
+  flexdashboard::flex_dashboard
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-### Introduction
+Introduction
+=====================================  
 
 Welcome to my corpus! I will be focusing on the evolution of psychedelic rock, from when it was born in the 1960s to today. Specifically, I will be analyzing the music of Grateful Dead and Tame Impala. 
 
-### Tame Impala: how does energy relate to tempo?
+Tame Impala {.storyboard}
+=====================================  
+
+### Tempo vs. Energy vs. Valence
 
 ```{r tameimpala1, echo=FALSE}
 library(ggplot2)
@@ -28,12 +31,12 @@ ggplot(tameImpala, aes(x = tempo, y = energy, size = valence, color = album_name
 
 ```
 
-***
+*** 
 
 The two graphs portrayed provide some insight into Tame Impala's music. Figure 1 (to the left) analyzes the ratio of tempo to energy in all of his songs, grouped by album and colored in accordingly. 
 -- ADD MORE ANALYSIS -- 
 
-### Tame Impala: "The Less I Know The Better" Analysis
+### "The Less I Know The Better" Chromagram Analysis
 
 ``` {r tameImpala2, echo=FALSE}
 library(ggplot2)
@@ -43,13 +46,13 @@ library(compmus)
 
 theLessIKnowID <- '6K4t31amVTZDgR3sKmwUJJ'
 
-wood <-
+tlik <-
   get_tidy_audio_analysis(theLessIKnowID) |>
   select(segments) |>
   unnest(segments) |>
   select(start, duration, pitches)
 
-wood |>
+tlik |>
   mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
   compmus_gather_chroma() |> 
   ggplot(
@@ -71,8 +74,82 @@ wood |>
 This is the chromagram of Tame Impala's biggest hit, "The Less I Know The Better". 
 -- ADD MORE ANALYSIS -- 
 
-### Grateful Dead
+
+### "The Less I Know The Better" Timbre Cepstrogram Analysis
+
+``` {r tameImpala3, echo=FALSE}
+library(ggplot2)
+library(tidyverse)
+library(spotifyr)
+library(compmus)
+
+theLessIKnowID <- '6K4t31amVTZDgR3sKmwUJJ'
+
+tlik <-
+  get_tidy_audio_analysis(theLessIKnowID) |> # Change URI.
+  compmus_align(tatums, segments) |>                     # Change `bars`
+  select(tatums) |>                                      #   in all three
+  unnest(tatums) |>                                      #   of these lines.
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "rms", norm = "manhattan"              # Change summary & norm.
+      )
+  ) |>
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "rms", norm = "manhattan"              # Change summary & norm.
+      )
+  )
+
+tlik |>
+  compmus_gather_timbre() |>
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = basis,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  scale_fill_viridis_c() +                              
+  theme_classic()
+
+tlik |>
+  compmus_self_similarity(timbre, "cosine") |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_classic() +
+  labs(x = "", y = "")
+```
 
 
-### Discussion
+*** 
+
+The graph to the left is a cepstrogram that represents tatums in the song "The Less I Know The Better", calculated using the Manhattan distance. There are clear changes in multiple areas. For example, c02 goes back and forth between high magnitudes and low magnitudes. c04 and c06 both start with a relatively low magnitude, then switches to a high magnitude for the rest of the track.
+
+The graph to the right is a self-similarity matrix.
+
+
+Grateful Dead
+=====================================  
+
+
+Discussion
+=====================================  
 
