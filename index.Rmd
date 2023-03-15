@@ -14,22 +14,50 @@ output:
 }
 .navbar-inverse .navbar-nav>.active > a, .navbar-inverse .navbar-nav>.active > a:hover, .navbar-inverse .navbar-nav>.active > a:focus {
   color: #ffffff;
-  background-color: rgb(163, 49, 48, 0.6);     /* active tab */
+  background-color: rgb(209, 72, 67, 0.45);     /* active tab */
 }
 .navbar-inverse .navbar-nav>li > a:hover, .navbar-inverse .navbar-nav > li > a:focus {
   color: #ffffff;
-  background-color: rgb(163, 49, 48, 0.6);     /* inactive tab on hover/focus */
+  background-color: rgb(209, 72, 67, 0.45);    /* inactive tab on hover/focus */
+}
+.sidebar.section.sidebar {    /* sidebar */
+  background-color: #ffffff;
+}
+.nav-tabs-custom > .nav-tabs > li.active {    /* tabset border color */
+  border-top-color: rgb(209, 72, 67, 0.45);
+}
+ /* navbar (dropdown) color */
+.navbar-inverse .dropdown-menu > li > a:hover, .navbar-inverse .dropdown-menu > li > a:focus {
+  background-color: rgb(209, 72, 67, 0.45);
+  color: #ffffff;
+}
+ /* navbar (dropdown) color */
+.navbar-inverse .dropdown-menu > .active > a, .navbar-inverse .dropdown-menu > .active > a:hover, .navbar-inverse .dropdown-menu > .active > a:focus {
+  background-color: rgb(209, 72, 67, 0.45);
+  color: #ffffff;
 }
 </style>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(flexdashboard)
+library(tidyverse)
+library(spotifyr)
+library(compmus)
+
+currents <- c('2X485T9Z5Ly0xyaghN73ed','1cCbsojaA6GIT7Y3zuMJ1q', '1UYj8qTWjneZJDVjUMwMub', '0xtIp0lgccN85GfGOekS5L', '5M4yti0QxgqJieUYaEXcpw', '79chzfFIIq7cHkqcYYORk0', '6K4t31amVTZDgR3sKmwUJJ', '4a9fW33mYR8LhXBOLUhbfF', '2gNfxysfBRfl9Lvi9T3v6R', '2O99aywAVBhaPrsiJ6zbSS', '3I7OmVsk4Hm5LBbs2GmhlD', '5h9hkYIBWTZYFRmF6Iz1gt', '52ojopYMUzeNcudsoz7O9D')
+currentsFeatures <- get_track_audio_features(currents)
+
+elecLadyland <- c('4COmeKH1pLNNpXcgtMcyQH', '3Yh64aiu2ANBwDFztyPDkT', '1ntxpzIUbSsizvuAy6lTYY', '0auKlivXpm76wR63mMJ3pR', '1jhH7vvy8hoHuc0mGuZsLX', '1HFj7yC7uZfqjWuoH6DO9r', '0KqHJXm4Z42fELkW83ZW0r', '1DfWmv1eJU1a9tuGpqKGFP', '36SULeBeglappJysOY6WzQ', '0xwG5stzrc5B70TycPwenY', '5uDpwSGjljhIgDB1ZYdp9c', '3q3gK9I4mj03565IGtVA0d', '0xKcrFF5ed7U4EPdG6vE4f', '6p5RohbRLDSjeERMZ90hMg', '2aoo2jlRnM3A0NyLQqMN2f', '2AxCeJ6PSsBYiTckM0HLY7')
+elecLadylandFeatures <- get_track_audio_features(elecLadyland)
+
 ```
 
 Introduction
 =====================================  
 
-Column {data-width=50%}
+Column {.sidebar data-width=400}
 -----------------------------------------------------------------------
 
 ### The Secrets Behind Psychedelic Rock
@@ -38,7 +66,7 @@ Psychedelic rock emerged as a style of rock music in early 1960s. As you may hav
 
 For this project, I will be mainly focusing on the secrets in the evolution of psychedelic rock from when it was born to today -- what techniques were used differently and how did that change what the songs want to convey? Specifically, I will be focusing on two bands that represent an era in psychedelic rock: The Grateful Dead (who is almost synonymous with psychedelic rock when it was born) and Tame Impala (widely regarded as one of the most successful modern psychedelic rock bands).
 
-You can scroll through their playlists on the right and get a feel of their music!
+To the right is a brief background of both bands as well as their playlists -- feel free to take a look and get familiar with their music! 
 
 <!-- ```{r, fig.width=5, fig.height=5} -->
 <!-- knitr::include_graphics("images/coverImage.jpeg") -->
@@ -47,26 +75,102 @@ You can scroll through their playlists on the right and get a feel of their musi
 <!-- ![](images/coverImage.jpeg){width=50%} -->
 
 
-Column {data-width=25%}
+Column {.tabset}
 -----------------------------------------------------------------------
 
-### Tame Impala 
+### Background
+
+#### Tame Impala
+
+![](images/tameImpalaBand.jpeg){width=100%}
+
+Description
+
+### Playlist
 
 <iframe src="https://open.spotify.com/embed/album/79dL7FLiJFOO0EoehUHQBv?utm_source=generator" height="100%" width="100%" style="border: none" allowfullscreen="" allow="autoplay" data-external="1"></iframe>
 
-Column {data-width=25%}
+Column {.tabset}
 -----------------------------------------------------------------------
 
-### Grateful Dead 
+### Background
 
-<iframe src="https://open.spotify.com/embed/album/1KytsXm6VQcyX5B5m8HBNa?utm_source=generator" height="100%" width="100%" style="border: none;" allowfullscreen="" allow="autoplay" data-external="1"></iframe>
+#### Jimi Hendrix
+
+Description
+
+![](images/jimiHendrix.jpeg){width=100%}
+
+### Playlist
+
+<iframe src="https://open.spotify.com/embed/album/5z090LQztiqh13wYspQvKQ?utm_source=generator" height="100%" width="100%" style="border: none;" allowfullscreen="" allow="autoplay" data-external="1"></iframe>
 
 
+Tempo vs. Energy {data-navmenu=Album\ Analysis}
+=====================================================================
 
-Tame Impala {.storyboard}
-=====================================  
+Column {.tabset data-width=40%}
+-------------------------------------------------
 
-### "The Less I Know The Better" Harmony and Chord Analysis
+### Tame Impala: Graph
+
+<!-- #### bpm -->
+<!-- ```{r echo=FALSE, fig.width=30} -->
+<!-- library(flexdashboard) -->
+<!-- gauge(42, min = 0, max = 100, symbol = 'bpm', gaugeSectors( -->
+<!--   success = c(80, 100), warning = c(40, 79), danger = c(0, 39) -->
+<!-- )) -->
+<!-- ``` -->
+
+<!-- #### energy -->
+<!-- ```{r echo=FALSE } -->
+<!-- library(flexdashboard) -->
+<!-- gauge(0.7, min = 0, max = 1.0, symbol = 'energy', gaugeSectors( -->
+<!--   success = c(0.80, 1.00), warning = c(0.40, 0.79), danger = c(0, 0.39) -->
+<!-- )) -->
+<!-- ``` -->
+
+<!-- # ```{r tameimpala1, echo=FALSE} -->
+<!-- # library(ggplot2) -->
+<!-- # library(tidyverse) -->
+<!-- # library(spotifyr) -->
+<!-- # library(compmus) -->
+<!-- # -->
+<!-- # tameImpala <- get_artist_audio_features('tame impala') -->
+<!-- # ggplot(tameImpala, aes(x = tempo, y = energy, size = valence, color = album_name)) + geom_point() + ggtitle("Tame Impala Analysis") -->
+<!-- # -->
+<!-- # ``` -->
+
+```{r tameimpala1, echo=FALSE}
+ggplot(currentsFeatures, aes(x = tempo, y = energy)) + geom_point() + ggtitle("Currents")
+```
+
+### Tame Impala: Analysis
+
+
+Column {.tabset data-width=40%}
+-------------------------------------------------
+
+### Jimi Henrix: Graph
+
+```{r jimiHendrix1, echo=FALSE}
+ggplot(elecLadylandFeatures, aes(x = tempo, y = energy)) + geom_point() + ggtitle("Electric Ladyland")
+```
+
+### Jimi Hendrix: Analysis
+
+Column {.tabset data-width=20%}
+-------------------------------------------------
+
+Compare
+
+The two graphs portrayed provide some insight into Tame Impala's music. Figure 1 (to the left) analyzes the ratio of tempo to energy in all of his songs, grouped by album and colored in accordingly. 
+-- ADD MORE ANALYSIS -- 
+
+Harmony and Chord {data-navmenu=Top\ Hit\ Analysis}
+===================================================
+
+### title
 
 <!-- ``` {r tameImpala4, echo=FALSE} -->
 <!-- library(ggplot2) -->
@@ -191,31 +295,13 @@ Tame Impala {.storyboard}
 
 <!-- ``` -->
 
-***
-
 The graph shown is the chordogram for Tame Impala's "The Less I Know The Better", and it's interesting to note that every "vertical column" of the diagram represents a different harmony in the background of the sun. For the first 60 seconds of the song, indicated by the first four major vertical sections, we can see pops of yellow for the F major and the B major. They correlate with the high-pitched chimes that Tame Impala inserts into the instrumentals of the song. Between seconds 70-100, the colors across all majors are very similar shades of green; this was when the chorus happened, and the instrumentals were more mellow to support the lyrics of the chorus. The last 100 seconds of the song saw a very consistent harmony. 
 
 It was also interesting to note the evolution of the C minor from the beginning to end, as it had the darkest boxes at the start and finish but got lighter during the middle.
 
-### Tempo vs. Energy vs. Valence
 
-<!-- ```{r tameimpala1, echo=FALSE} -->
-<!-- library(ggplot2) -->
-<!-- library(tidyverse) -->
-<!-- library(spotifyr) -->
-<!-- library(compmus) -->
-
-<!-- tameImpala <- get_artist_audio_features('tame impala') -->
-<!-- ggplot(tameImpala, aes(x = tempo, y = energy, size = valence, color = album_name)) + geom_point() + ggtitle("Tame Impala Analysis") -->
-
-<!-- ``` -->
-
-*** 
-
-The two graphs portrayed provide some insight into Tame Impala's music. Figure 1 (to the left) analyzes the ratio of tempo to energy in all of his songs, grouped by album and colored in accordingly. 
--- ADD MORE ANALYSIS -- 
-
-### "The Less I Know The Better" Chromagram Analysis
+Chromagram Analysis {data-navmenu=Top\ Hit\ Analysis}
+==============================================================================
 
 <!-- ``` {r tameImpala2, echo=FALSE} -->
 <!-- library(ggplot2) -->
@@ -317,21 +403,11 @@ The two graphs portrayed provide some insight into Tame Impala's music. Figure 1
 <!--   labs(x = "", y = "") -->
 <!-- ``` -->
 
-
-*** 
-
 The graph to the left is a cepstrogram that represents tatums in the song "The Less I Know The Better", calculated using the Manhattan distance. There are clear changes in multiple areas. For example, c02 goes back and forth between high magnitudes and low magnitudes. c04 and c06 both start with a relatively low magnitude, then switches to a high magnitude for the rest of the track.
 
 The graph to the right is a self-similarity matrix.
 
 
-
-
-
-Grateful Dead
-=====================================  
-
-
-Discussion
+Conclusion
 =====================================  
 
