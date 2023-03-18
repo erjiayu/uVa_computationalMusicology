@@ -26,13 +26,18 @@ output:
 .nav-tabs-custom > .nav-tabs > li.active {    /* tabset border color */
   border-top-color: rgb(209, 72, 67, 0.45);
 }
- /* navbar (dropdown) color */
+/* navbar (dropdown) color */
 .navbar-inverse .dropdown-menu > li > a:hover, .navbar-inverse .dropdown-menu > li > a:focus {
   background-color: rgb(209, 72, 67, 0.45);
   color: #ffffff;
 }
- /* navbar (dropdown) color */
+/* navbar (dropdown) color */
 .navbar-inverse .dropdown-menu > .active > a, .navbar-inverse .dropdown-menu > .active > a:hover, .navbar-inverse .dropdown-menu > .active > a:focus {
+  background-color: rgb(209, 72, 67, 0.45);
+  color: #ffffff;
+}
+/* navbar (dropdown) color */
+.navbar-inverse .navbar-nav>.open>a, .navbar-inverse .navbar-nav>.open>a:hover, .navbar-inverse .navbar-nav>.open>a:focus {
   background-color: rgb(209, 72, 67, 0.45);
   color: #ffffff;
 }
@@ -45,12 +50,16 @@ library(flexdashboard)
 library(tidyverse)
 library(spotifyr)
 library(compmus)
+library(plotly)
 
 currents <- c('2X485T9Z5Ly0xyaghN73ed','1cCbsojaA6GIT7Y3zuMJ1q', '1UYj8qTWjneZJDVjUMwMub', '0xtIp0lgccN85GfGOekS5L', '5M4yti0QxgqJieUYaEXcpw', '79chzfFIIq7cHkqcYYORk0', '6K4t31amVTZDgR3sKmwUJJ', '4a9fW33mYR8LhXBOLUhbfF', '2gNfxysfBRfl9Lvi9T3v6R', '2O99aywAVBhaPrsiJ6zbSS', '3I7OmVsk4Hm5LBbs2GmhlD', '5h9hkYIBWTZYFRmF6Iz1gt', '52ojopYMUzeNcudsoz7O9D')
 currentsFeatures <- get_track_audio_features(currents)
 
 elecLadyland <- c('4COmeKH1pLNNpXcgtMcyQH', '3Yh64aiu2ANBwDFztyPDkT', '1ntxpzIUbSsizvuAy6lTYY', '0auKlivXpm76wR63mMJ3pR', '1jhH7vvy8hoHuc0mGuZsLX', '1HFj7yC7uZfqjWuoH6DO9r', '0KqHJXm4Z42fELkW83ZW0r', '1DfWmv1eJU1a9tuGpqKGFP', '36SULeBeglappJysOY6WzQ', '0xwG5stzrc5B70TycPwenY', '5uDpwSGjljhIgDB1ZYdp9c', '3q3gK9I4mj03565IGtVA0d', '0xKcrFF5ed7U4EPdG6vE4f', '6p5RohbRLDSjeERMZ90hMg', '2aoo2jlRnM3A0NyLQqMN2f', '2AxCeJ6PSsBYiTckM0HLY7')
 elecLadylandFeatures <- get_track_audio_features(elecLadyland)
+
+tlikID <- '6K4t31amVTZDgR3sKmwUJJ'
+bomlID <- '36SULeBeglappJysOY6WzQ'
 
 ```
 
@@ -109,7 +118,7 @@ Description
 Tempo vs. Energy {data-navmenu=Album\ Analysis}
 =====================================================================
 
-Column {.tabset data-width=40%}
+Column {.tabset data-width=30%}
 -------------------------------------------------
 
 ### Tame Impala: Graph
@@ -142,30 +151,156 @@ Column {.tabset data-width=40%}
 <!-- # ``` -->
 
 ```{r tameimpala1, echo=FALSE}
-ggplot(currentsFeatures, aes(x = tempo, y = energy)) + geom_point() + ggtitle("Currents")
+p <- ggplot(currentsFeatures, aes(x = tempo, y = energy, size = valence, color = mode)) + geom_point() + ggtitle("Currents")
+ggplotly(p)
+currentsMeanTempo <- currentsFeatures %>% summarize(meanTempo = mean(tempo), meanEnergy = mean(energy))
 ```
 
 ### Tame Impala: Analysis
 
+Tame Impala's album, Currents, generally follows a pretty fast BPM that falls between 100 - 150, with an average at 130.86 BPM. Almost all thirteen songs but three fall within this range. It also has a very high energy level -- eleven songs have an energy level that is greater than 0.6, and the album averages at about 0.71. From this, we can infer that the album is very energetic and feels loud and fast. In addition to that, the majority of the songs use major scales (indicated by blue circles that represent a major as a 1 in the plot).
 
-Column {.tabset data-width=40%}
+It's interesting to note that the valence levels of this album is very neutral. It averages at 0.47, meaning that its musical positiveness is not at either extreme. It is very neutral despite its high energy levels and its use of major scales, which are typically associated with creating a happy or uplifting mood. 
+
+Column {.tabset data-width=30%}
 -------------------------------------------------
 
 ### Jimi Henrix: Graph
 
 ```{r jimiHendrix1, echo=FALSE}
-ggplot(elecLadylandFeatures, aes(x = tempo, y = energy)) + geom_point() + ggtitle("Electric Ladyland")
+p <- ggplot(elecLadylandFeatures, aes(x = tempo, y = energy, size = valence, color = mode)) + geom_point() + ggtitle("Electric Ladyland")
+ggplotly(p)
 ```
 
 ### Jimi Hendrix: Analysis
 
-Column {.tabset data-width=20%}
+In Jimi Hendrix's album, Electric Ladyland, it is important to note that the track "Moon, Turn the Tides... Gently Gently Away" lies outside the general range of all values of other songs. This is because it is an interlude song within the album, and its purpose was to connect the tracks "1983... (A Merman I Should Turn to Be)" and "Still Raining, Still Dreaming". As a result, I will be using median values for analysis in the next paragraph. 
+
+Electric Ladyland also follows a typically fast BPM, but it is more moderato than allegro. It's median is at 113.19 BPM, which falls into the moderate range of beats in music. It also has a median valence value of 0.54 and median energy level of 0.81, indicating that it is a relatively loud and fast album despite also being neutral in terms of musical positivity. It also uses major scales for most of its songs. 
+
+Column {.tabset data-width=30%}
 -------------------------------------------------
 
-Compare
+#### Compare
 
-The two graphs portrayed provide some insight into Tame Impala's music. Figure 1 (to the left) analyzes the ratio of tempo to energy in all of his songs, grouped by album and colored in accordingly. 
--- ADD MORE ANALYSIS -- 
+The two scatterplots shown on the left represent the relationship between each album's tempo, energy, valence, and mode. I wanted to focus on these factors first because to me, pschydelic music is heavily involved with beats and the energy/mood that it brings to its audience. You can click through the tabs to view each album's individual analysis first, then come back for the compare and contrast.
+
+In general, the two albums are actually very similar in the four factors involved. 
+
+Tempograms {data-navmenu=Top\ Hit\ Analysis}
+===================================================
+
+Column {.tabset}
+-------------------------------------------------
+
+### "The Less I Know The Better"
+
+Using the energy-based novelty function, we can see that the tempo in the first 30 seconds of "The Less I Know The Better" is quite interesting. It seems to be grouped in triplets. -- will add more analysis --
+
+On the other hand, its pitches seem to follow a very consistent pattern in the first 30 seconds. A peak will first occur, then it will be followed by a series of 2 smaller peaks. This can be seen in periods such as between 20s - 22.5s. -- will add more analysis -- 
+
+### "Burning of the Midnight Lamp"
+
+Analysis
+
+Column 
+-------------------------------------------------
+
+### "The Less I Know The Better": Tempo
+
+``` {r tameImpala5, echo=FALSE}
+tlik <-
+  get_tidy_audio_analysis(tlikID) |>
+  select(segments) |>
+  unnest(segments)
+
+tlikplot <- tlik |>
+  mutate(loudness_max_time = start + loudness_max_time) |>
+  arrange(loudness_max_time) |>
+  mutate(delta_loudness = loudness_max - lag(loudness_max)) |>
+  ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
+  geom_line() +
+  xlim(0, 30) +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Novelty")
+
+ggplotly(tlikplot)
+```
+
+### "The Less I Know The Better": Pitches
+
+``` {r tameImpala6, echo=FALSE}
+tlik <-
+  get_tidy_audio_analysis(tlikID) |>
+  select(segments) |>
+  unnest(segments)
+
+tlikplot <- tlik |>
+  mutate(pitches = map(pitches, compmus_normalise, "clr")) |>
+  arrange(start) |>
+  mutate(pitches = map2(pitches, lag(pitches), `-`)) |>
+  slice(-1) |> 
+  compmus_gather_chroma() |> 
+  group_by(start, duration) |> 
+  summarise(novelty = sum(log1p(pmax(value, 0)))) |> 
+  ggplot(aes(x = start + duration / 2, y = novelty)) +
+  geom_line() +
+  xlim(0, 30) +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Novelty")
+
+ggplotly(tlikplot)
+```
+
+
+Column
+--------------------------------------------------
+
+### "Burning of the Midnight Lamp": Tempo
+
+``` {r boml4, echo=FALSE}
+boml <-
+  get_tidy_audio_analysis(bomlID) |>
+  select(segments) |>
+  unnest(segments)
+
+bomlplot <- boml |>
+  mutate(loudness_max_time = start + loudness_max_time) |>
+  arrange(loudness_max_time) |>
+  mutate(delta_loudness = loudness_max - lag(loudness_max)) |>
+  ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
+  geom_line() +
+  xlim(0, 30) +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Novelty")
+
+ggplotly(bomlplot)
+```
+
+### "Burning of the Midnight Lamp": Pitches
+
+``` {r boml5, echo=FALSE}
+boml <-
+  get_tidy_audio_analysis(bomlID) |>
+  select(segments) |>
+  unnest(segments)
+
+bomlplot <- boml |>
+  mutate(pitches = map(pitches, compmus_normalise, "clr")) |>
+  arrange(start) |>
+  mutate(pitches = map2(pitches, lag(pitches), `-`)) |>
+  slice(-1) |> 
+  compmus_gather_chroma() |> 
+  group_by(start, duration) |> 
+  summarise(novelty = sum(log1p(pmax(value, 0)))) |> 
+  ggplot(aes(x = start + duration / 2, y = novelty)) +
+  geom_line() +
+  xlim(0, 30) +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "Novelty")
+
+ggplotly(bomlplot)
+```
 
 Harmony and Chord {data-navmenu=Top\ Hit\ Analysis}
 ===================================================
