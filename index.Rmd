@@ -8,6 +8,9 @@ output:
 ---
 
 <style>
+body {
+  background:  rgb(130, 92, 128, 0.2);
+}
 .navbar-inverse {                /* navbar */
     background-color:  rgb(130, 92, 128, 0.7);
     border-color: white;
@@ -52,6 +55,9 @@ library(spotifyr)
 library(compmus)
 library(plotly)
 
+tameImpala <- get_artist_audio_features('tame impala')
+jimiHendrix <- get_artist_audio_features('jimi hendrix')
+
 currents <- c('2X485T9Z5Ly0xyaghN73ed','1cCbsojaA6GIT7Y3zuMJ1q', '1UYj8qTWjneZJDVjUMwMub', '0xtIp0lgccN85GfGOekS5L', '5M4yti0QxgqJieUYaEXcpw', '79chzfFIIq7cHkqcYYORk0', '6K4t31amVTZDgR3sKmwUJJ', '4a9fW33mYR8LhXBOLUhbfF', '2gNfxysfBRfl9Lvi9T3v6R', '2O99aywAVBhaPrsiJ6zbSS', '3I7OmVsk4Hm5LBbs2GmhlD', '5h9hkYIBWTZYFRmF6Iz1gt', '52ojopYMUzeNcudsoz7O9D')
 currentsFeatures <- get_track_audio_features(currents)
 
@@ -73,7 +79,7 @@ Column {.sidebar data-width=400}
 
 Psychedelic rock emerged as a style of rock music in early 1960s. As you may have guessed from its name, the inspiration for this genre mainly came from hallucinogens that can "expand your mind" and guide you into an otherworldly trip (think LSD or magic mushrooms). It uses intense electronic sound effects and extended instrumental solos to imitate the drug-induced state that psychedelic users go through. 
 
-For this project, I will be mainly focusing on the secrets in the evolution of psychedelic rock from when it was born to today -- what techniques were used differently and how did that change what the songs want to convey? Specifically, I will be focusing on two bands that represent an era in psychedelic rock: The Grateful Dead (who is almost synonymous with psychedelic rock when it was born) and Tame Impala (widely regarded as one of the most successful modern psychedelic rock bands).
+For this project, I will be mainly focusing on the secrets in the evolution of psychedelic rock from when it was born to today -- what techniques were used differently and how did that change what the songs want to convey? Specifically, I will be focusing on two bands that represent an era in psychedelic rock: Jimi Hendrix (who is almost synonymous with psychedelic rock when it was born) and Tame Impala (widely regarded as one of the most successful modern psychedelic rock bands).
 
 To the right is a brief background of both bands as well as their playlists -- feel free to take a look and get familiar with their music! 
 
@@ -93,7 +99,7 @@ Column {.tabset}
 
 ![](images/tameImpalaBand.jpeg){width=100%}
 
-Description
+Tame Impala is a musical project primarily consisting of Kevin Parker, a multi-instrumentalist and producer from Perth, Australia. The music of Tame Impala is known for its psychedelic and dreamy soundscapes, with Parker often experimenting with various production techniques to create a unique and otherworldly atmosphere. The music draws inspiration from a range of genres, including psychedelic rock, funk, and electronic music, and often features intricate instrumentation and rich harmonies. I will be examining his top album *Currents* and his top hit "The Less I Know The Better" in the rest of this corpus. 
 
 ### Playlist
 
@@ -106,7 +112,7 @@ Column {.tabset}
 
 #### Jimi Hendrix
 
-Description
+Jimi Hendrix was an American musician, singer, and songwriter who is widely regarded as one of the most influential and innovative guitarists in the history of rock music. His style of playing was characterized by his innovative use of distortion, feedback, and wah-wah effects, which he used to create a unique sound that was both melodic and psychedelic. He was also known for his flamboyant stage presence and his use of showmanship, which helped to make him a popular figure in the counterculture of the 1960s. As a result, he became a leading figure in this movement of psychedelic rock, and his music was heavily influenced by his experiences with LSD and other psychedelic drugs. I will be examining his top album *Electric Ladyland* and his top hit "The Burning of the Midnight Lamp" in the rest of this corpus. \n \n \n
 
 ![](images/jimiHendrix.jpeg){width=100%}
 
@@ -158,9 +164,9 @@ currentsMeanTempo <- currentsFeatures %>% summarize(meanTempo = mean(tempo), mea
 
 ### Tame Impala: Analysis
 
-Tame Impala's album, Currents, generally follows a pretty fast BPM that falls between 100 - 150, with an average at 130.86 BPM. Almost all thirteen songs but three fall within this range. It also has a very high energy level -- eleven songs have an energy level that is greater than 0.6, and the album averages at about 0.71. From this, we can infer that the album is very energetic and feels loud and fast. In addition to that, the majority of the songs use major scales (indicated by blue circles that represent a major as a 1 in the plot).
+Tame Impala's album, Currents, generally follows a pretty fast BPM that falls between 100 - 150, with a median of 125.01 BPM. Almost all thirteen songs but three fall within this range. It also has a very high energy level -- eleven songs have an energy level that is greater than 0.6, with the album median at about 0.74 From this, we can infer that the album is very energetic and feels loud and fast. In addition to that, the majority of the songs use major scales (indicated by blue circles that represent a major as a 1 in the plot).
 
-It's interesting to note that the valence levels of this album is very neutral. It averages at 0.47, meaning that its musical positiveness is not at either extreme. It is very neutral despite its high energy levels and its use of major scales, which are typically associated with creating a happy or uplifting mood. 
+It's interesting to note that the valence levels of this album is very neutral. Its median is at 0.45, meaning that its musical positiveness is not at either extreme. It is very neutral despite its high energy levels and its use of major scales, which are typically associated with creating a happy or uplifting mood. 
 
 Column {.tabset data-width=30%}
 -------------------------------------------------
@@ -174,7 +180,7 @@ ggplotly(p)
 
 ### Jimi Hendrix: Analysis
 
-In Jimi Hendrix's album, Electric Ladyland, it is important to note that the track "Moon, Turn the Tides... Gently Gently Away" lies outside the general range of all values of other songs. This is because it is an interlude song within the album, and its purpose was to connect the tracks "1983... (A Merman I Should Turn to Be)" and "Still Raining, Still Dreaming". As a result, I will be using median values for analysis in the next paragraph. 
+In Jimi Hendrix's album, Electric Ladyland, it is important to note that the track "Moon, Turn the Tides... Gently Gently Away" lies outside the general range of all values of other songs. This is because it is an interlude song within the album, and its purpose was to connect the tracks "1983... (A Merman I Should Turn to Be)" and "Still Raining, Still Dreaming".
 
 Electric Ladyland also follows a typically fast BPM, but it is more moderato than allegro. It's median is at 113.19 BPM, which falls into the moderate range of beats in music. It also has a median valence value of 0.54 and median energy level of 0.81, indicating that it is a relatively loud and fast album despite also being neutral in terms of musical positivity. It also uses major scales for most of its songs. 
 
@@ -185,7 +191,45 @@ Column {.tabset data-width=30%}
 
 The two scatterplots shown on the left represent the relationship between each album's tempo, energy, valence, and mode. I wanted to focus on these factors first because to me, pschydelic music is heavily involved with beats and the energy/mood that it brings to its audience. You can click through the tabs to view each album's individual analysis first, then come back for the compare and contrast.
 
-In general, the two albums are actually very similar in the four factors involved. 
+In general, the two albums are actually very similar in the four factors involved. They both had very similar median values for tempo, valence, and energy, and both used mainly major scales. Electric Ladyland had a slightly slower tempo (a difference of 11.92 BPM between the medians), but it also has a slightly higher energy and valence level (a difference of 0.09 in valence and 0.07 in energy). 
+
+This was interesting to me because I had thought that a faster tempo is often correlated with more energy, as fast music often brings people to dance and closer to experiencing positivity. However, when examining these two albums, it seems like Currents had a quicker tempo but remained relatively neutral in inducing emotions in its audience, while The Burning of the Midnight Lamp had a slower tempo but was able to bring out more in its listeners. 
+
+Key Histograms {data-orientation=rows data-navmenu=Album\ Analysis}
+===================================================
+
+Row {data-height=75}
+-------------------------------------------------
+
+### Background
+
+Musical keys have always been associated with emotional or qualitative characteristics. One of the most widely spread descriptions of such characteristics was produced by Christian Schubart in his work *Ideen zu einer Aesthetik der Tonkunst* in 1806. I wanted to see what keys did Tame Impala and Jimi Hendrix use: was there a key that they used very often? If so, what did they want to convey through that? I will be evaluating using [Shubart's work](https://wmich.edu/mus-theo/courses/keys.html).
+
+Row {data-height=250}
+-------------------------------------------------
+
+### Tame Impala {data-width=500}
+
+Tame Impala favored using the C major key throughout his entire discography, with D# (Eb) major and G major coming in second and third. The C major is known to resemble a character's innocence and freedom from burden; the D# major is related to love and conversation with God; and, the G major represents gentleness and peacefulness. It seems like Tame Impala's music triggers the audience's desire to stay pure and gentle, and their overwhelming use of the C major taps into their listeners' inner-selves. This also correlates with the genre of psychedelic rock because the use of psychedelics is linked to an increasing sense of the mind and opens up the user to themselves.
+
+### Tame Impala: Histogram
+
+```{r tameImpala2, echo=FALSE, fig.width=6, fig.height=2}
+ggplot(tameImpala, aes(x=key, fill=factor(mode))) + geom_bar() + scale_x_discrete(name = "key", labels=c("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"), limits= c(0,1,2,3,4,5,6,7,8,9,10,11)) + scale_fill_discrete(name="mode", labels=c("minor","major"))
+```
+
+Row {data-height=250}
+-------------------------------------------------
+
+### Jimi Hendrix {data-width=500}
+
+Jimi Hendrix uses two main keys throughout his entire discography: the C# (Db) major and the G# (Ab) major. The C# major represents grief and sadness, and it brings out unusual characters and feelings. Similarly, the G# major is associated with death and grave. What's interesting is that these two keys are not commonly used in popular music; however, it is very clear that Hendrix still favors these two keys over the others as there is a clear distinction between the frequency of C# and G# and the remaining keys. These characteristics contribute to the genre of psychedelic rock because the combination of the use of two unusual keys, as well as the negative feelings that they introduce to the audience, was able to contribute to a tonal ambiguity. As a result, Hendrix was able to produce a dreamlike quality in his music that is characteristic of the psychedelic genre.
+
+### Jimi Hendrix: Histogram
+
+```{r jimiHendrix2, echo=FALSE, fig.width=6, fig.height=2}
+ggplot(jimiHendrix, aes(x=key, fill=factor(mode))) + geom_bar() + scale_x_discrete(name = "key" , labels=c("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"), limits= c(0,1,2,3,4,5,6,7,8,9,10,11)) + scale_fill_discrete(name="mode", labels=c("minor","major"))
+```
 
 Tempograms {data-navmenu=Top\ Hit\ Analysis}
 ===================================================
