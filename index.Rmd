@@ -296,6 +296,19 @@ tlikplot <- tlik |>
 ggplotly(tlikplot)
 ```
 
+### "The Less I Know The Better": Tempogram
+
+```{r tameImpala7, echo=FALSE}
+tlik <- get_tidy_audio_analysis(tlikID)
+
+tlik |>
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+```
 
 Column
 --------------------------------------------------
@@ -345,6 +358,21 @@ bomlplot <- boml |>
 
 ggplotly(bomlplot)
 ```
+
+### "The Burning of the Midnight Lamp": Tempogram
+
+```{r jimiHendrix7, echo=FALSE}
+boml <- get_tidy_audio_analysis(bomlID)
+
+boml |>
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+```
+
 
 Harmony and Chord {data-navmenu=Top\ Hit\ Analysis}
 ===================================================
