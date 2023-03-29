@@ -231,6 +231,270 @@ Jimi Hendrix uses two main keys throughout his entire discography: the C# (Db) m
 ggplot(jimiHendrix, aes(x=key, fill=factor(mode))) + geom_bar() + scale_x_discrete(name = "key" , labels=c("C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"), limits= c(0,1,2,3,4,5,6,7,8,9,10,11)) + scale_fill_discrete(name="mode", labels=c("minor","major"))
 ```
 
+Chromagrams {data-navmenu=Top\ Hit\ Analysis}
+==============================================================================
+
+Column {.tabset}
+---------------------------------------------
+
+### "The Less I Know The Better"
+
+``` {r tameImpala3, echo=FALSE}
+tlik <-
+  get_tidy_audio_analysis(tlikID) |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+
+tlik |>
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
+  compmus_gather_chroma() |>
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c()
+```
+
+### "The Burning of the Midnight Lamp"
+
+``` {r jimiHendrix3, echo=FALSE}
+boml <-
+  get_tidy_audio_analysis(bomlID) |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+
+boml |>
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
+  compmus_gather_chroma() |>
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c()
+```
+
+Column
+--------------------------------------------------------
+
+### "The Less I Know The Better" Analysis
+
+The chromagram for Tame Impala's top hit, "The Less I Know The Better", is computed using the Euclidean distance, which allows it to capture the similarities between two chroma vectors. It is particularly interesting because there is evidence for a wide range of pitch distribution as well as the consistent use of certain chords throughout the entire song. For example, pitches E and C# are repeatedly used in alternating intervals, with each segment lasting about 5 seconds. Pitches B and D# also occur in the same way, but with each segment lasting about 2 seconds. These alternating sequences of pitches indicate the complex makeup of "The Less I Know The better", as the song is composed of several layers of sounds: the repetition of bassline, the use of dreamy guitar, as well as the variations of synth parts. 
+
+### "The Buring of the Midnight Lamp" Analysis
+
+The chromagram for Jimi Hendrix's top hit, "The Burning of the Midnight Lamp", is also computed with Euclidean distance. Compare to "The Less I Know The Better", this chromagram displays much less variation across the use of pitches. Jimi Hendrix mostly focused on pitches F, E, D, and C; the overlap of segments of these pitches suggest that he tried to focus on harmony rather than alternating sequences of instruments. This is also supported by instances where magnitudes of these pitches spike together. For example, around 70sec and 150sec, pitches F and C both show a high magnitude that last about 5-7 seconds. They also correspond to the beginning of the two intense guitar solos during the song, showing how much Hendrix places emphasis on creating harmonies between the drums and the guitar. 
+
+Cepstrograms {data-navmenu=Top\ Hit\ Analysis}
+==============================================================================
+
+Column {.tabset}
+------------------------------------------------------------------------------
+
+<!-- # tlik <- -->
+<!-- #   get_tidy_audio_analysis(tlikID) |> # Change URI. -->
+<!-- #   compmus_align(beats, segments) |>                     # Change `bars` -->
+<!-- #   select(beats) |>                                      #   in all three -->
+<!-- #   unnest(beats) |>                                      #   of these lines. -->
+<!-- #   mutate( -->
+<!-- #     pitches = -->
+<!-- #       map(segments, -->
+<!-- #         compmus_summarise, pitches, -->
+<!-- #         method = "rms", norm = "chebyshev"              # Change summary & norm. -->
+<!-- #       ) -->
+<!-- #   ) |> -->
+<!-- #   mutate( -->
+<!-- #     timbre = -->
+<!-- #       map(segments, -->
+<!-- #         compmus_summarise, timbre, -->
+<!-- #         method = "rms", norm = "chebyshev"              # Change summary & norm. -->
+<!-- #       ) -->
+<!-- #   ) -->
+<!-- #  -->
+<!-- # tlik |> -->
+<!-- #   compmus_gather_timbre() |> -->
+<!-- #   ggplot( -->
+<!-- #     aes( -->
+<!-- #       x = start + duration / 2, -->
+<!-- #       width = duration, -->
+<!-- #       y = basis, -->
+<!-- #       fill = value -->
+<!-- #     ) -->
+<!-- #   ) + -->
+<!-- #   geom_tile() + -->
+<!-- #   labs(x = "Time (s)", y = NULL, fill = "Magnitude") + -->
+<!-- #   scale_fill_viridis_c() + -->
+<!-- #   theme_classic() -->
+
+### "The Less I Know The Better"
+
+``` {r tameImpala4, echo=FALSE}
+tlik <-
+  get_tidy_audio_analysis(tlikID) |>
+  compmus_align(bars, segments) |>
+  select(bars) |>
+  unnest(bars) |>
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "acentre", norm = "manhattan"
+      )
+  ) |>
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  )
+bind_rows(
+  tlik |> 
+    compmus_self_similarity(pitches, "aitchison") |> 
+    mutate(d = d / max(d), type = "Chroma"),
+  tlik |> 
+    compmus_self_similarity(timbre, "euclidean") |> 
+    mutate(d = d / max(d), type = "Timbre")
+) |>
+  mutate() |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  facet_wrap(~type) +
+  scale_fill_viridis_c(option = "E", guide = "none") +
+  theme_classic() + 
+  labs(x = "", y = "")
+```
+
+### "The Burning of the Midnight Lamp"
+
+<!-- boml <- -->
+<!--   get_tidy_audio_analysis(bomlID) |> # Change URI. -->
+<!--   compmus_align(beats, segments) |>                     # Change `bars` -->
+<!--   select(beats) |>                                      #   in all three -->
+<!--   unnest(beats) |>                                      #   of these lines. -->
+<!--   mutate( -->
+<!--     pitches = -->
+<!--       map(segments, -->
+<!--         compmus_summarise, pitches, -->
+<!--         method = "rms", norm = "chebyshev"              # Change summary & norm. -->
+<!--       ) -->
+<!--   ) |> -->
+<!--   mutate( -->
+<!--     timbre = -->
+<!--       map(segments, -->
+<!--         compmus_summarise, timbre, -->
+<!--         method = "rms", norm = "chebyshev"              # Change summary & norm. -->
+<!--       ) -->
+<!--   ) -->
+
+<!-- boml |> -->
+<!--   compmus_gather_timbre() |> -->
+<!--   ggplot( -->
+<!--     aes( -->
+<!--       x = start + duration / 2, -->
+<!--       width = duration, -->
+<!--       y = basis, -->
+<!--       fill = value -->
+<!--     ) -->
+
+<!--   ) + -->
+<!--   geom_tile() + -->
+<!--   labs(x = "Time (s)", y = NULL, fill = "Magnitude") + -->
+<!--   scale_fill_viridis_c() + -->
+<!--   theme_classic() -->
+
+``` {r jimiHendrix4, echo=FALSE}
+
+boml <-
+  get_tidy_audio_analysis(bomlID) |>
+  compmus_align(bars, segments) |>
+  select(bars) |>
+  unnest(bars) |>
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "acentre", norm = "manhattan"
+      )
+  ) |>
+  mutate(
+    timbre =
+      map(segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  )
+bind_rows(
+  boml |> 
+    compmus_self_similarity(pitches, "aitchison") |> 
+    mutate(d = d / max(d), type = "Chroma"),
+  boml |> 
+    compmus_self_similarity(timbre, "euclidean") |> 
+    mutate(d = d / max(d), type = "Timbre")
+) |>
+  mutate() |> 
+  ggplot(
+    aes(
+      x = xstart + xduration / 2,
+      width = xduration,
+      y = ystart + yduration / 2,
+      height = yduration,
+      fill = d
+    )
+  ) +
+  geom_tile() +
+  coord_fixed() +
+  facet_wrap(~type) +
+  scale_fill_viridis_c(option = "E", guide = "none") +
+  theme_classic() + 
+  labs(x = "", y = "")
+
+```
+
+Column
+------------------------------------------------------------------------------
+
+### Background
+
+The two self-similarity matrices generated on the left are 
+
+### "The Less I Know The Better" Analysis
+
+Analysis
+
+### "The Burning of the Midnight Lamp" Analysis
+
+Analysis
+
+
+<!-- The graph to the left is a cepstrogram that represents tatums in the song "The Less I Know The Better", calculated using the Manhattan distance. There are clear changes in multiple areas. For example, c02 goes back and forth between high magnitudes and low magnitudes. c04 and c06 both start with a relatively low magnitude, then switches to a high magnitude for the rest of the track. -->
+
+<!-- The graph to the right is a self-similarity matrix. -->
+
 Tempograms {data-navmenu=Top\ Hit\ Analysis}
 ===================================================
 
@@ -252,126 +516,126 @@ Column
 
 ### "The Less I Know The Better": Tempo
 
-``` {r tameImpala5, echo=FALSE}
-tlik <-
-  get_tidy_audio_analysis(tlikID) |>
-  select(segments) |>
-  unnest(segments)
+<!-- ``` {r tameImpala5, echo=FALSE} -->
+<!-- tlik <- -->
+<!--   get_tidy_audio_analysis(tlikID) |> -->
+<!--   select(segments) |> -->
+<!--   unnest(segments) -->
 
-tlikplot <- tlik |>
-  mutate(loudness_max_time = start + loudness_max_time) |>
-  arrange(loudness_max_time) |>
-  mutate(delta_loudness = loudness_max - lag(loudness_max)) |>
-  ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
-  geom_line() +
-  xlim(0, 30) +
-  theme_minimal() +
-  labs(x = "Time (s)", y = "Novelty")
+<!-- tlikplot <- tlik |> -->
+<!--   mutate(loudness_max_time = start + loudness_max_time) |> -->
+<!--   arrange(loudness_max_time) |> -->
+<!--   mutate(delta_loudness = loudness_max - lag(loudness_max)) |> -->
+<!--   ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) + -->
+<!--   geom_line() + -->
+<!--   xlim(0, 30) + -->
+<!--   theme_minimal() + -->
+<!--   labs(x = "Time (s)", y = "Novelty") -->
 
-ggplotly(tlikplot)
-```
+<!-- ggplotly(tlikplot) -->
+<!-- ``` -->
 
 ### "The Less I Know The Better": Pitches
 
-``` {r tameImpala6, echo=FALSE}
-tlik <-
-  get_tidy_audio_analysis(tlikID) |>
-  select(segments) |>
-  unnest(segments)
+<!-- ``` {r tameImpala6, echo=FALSE} -->
+<!-- tlik <- -->
+<!--   get_tidy_audio_analysis(tlikID) |> -->
+<!--   select(segments) |> -->
+<!--   unnest(segments) -->
 
-tlikplot <- tlik |>
-  mutate(pitches = map(pitches, compmus_normalise, "clr")) |>
-  arrange(start) |>
-  mutate(pitches = map2(pitches, lag(pitches), `-`)) |>
-  slice(-1) |> 
-  compmus_gather_chroma() |> 
-  group_by(start, duration) |> 
-  summarise(novelty = sum(log1p(pmax(value, 0)))) |> 
-  ggplot(aes(x = start + duration / 2, y = novelty)) +
-  geom_line() +
-  xlim(0, 30) +
-  theme_minimal() +
-  labs(x = "Time (s)", y = "Novelty")
+<!-- tlikplot <- tlik |> -->
+<!--   mutate(pitches = map(pitches, compmus_normalise, "clr")) |> -->
+<!--   arrange(start) |> -->
+<!--   mutate(pitches = map2(pitches, lag(pitches), `-`)) |> -->
+<!--   slice(-1) |>  -->
+<!--   compmus_gather_chroma() |>  -->
+<!--   group_by(start, duration) |>  -->
+<!--   summarise(novelty = sum(log1p(pmax(value, 0)))) |>  -->
+<!--   ggplot(aes(x = start + duration / 2, y = novelty)) + -->
+<!--   geom_line() + -->
+<!--   xlim(0, 30) + -->
+<!--   theme_minimal() + -->
+<!--   labs(x = "Time (s)", y = "Novelty") -->
 
-ggplotly(tlikplot)
-```
+<!-- ggplotly(tlikplot) -->
+<!-- ``` -->
 
 ### "The Less I Know The Better": Tempogram
 
-```{r tameImpala7, echo=FALSE}
-tlik <- get_tidy_audio_analysis(tlikID)
+<!-- ```{r tameImpala7, echo=FALSE} -->
+<!-- tlik <- get_tidy_audio_analysis(tlikID) -->
 
-tlik |>
-  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
-  ggplot(aes(x = time, y = bpm, fill = power)) +
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +
-  labs(x = "Time (s)", y = "Tempo (BPM)") +
-  theme_classic()
-```
+<!-- tlik |> -->
+<!--   tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |> -->
+<!--   ggplot(aes(x = time, y = bpm, fill = power)) + -->
+<!--   geom_raster() + -->
+<!--   scale_fill_viridis_c(guide = "none") + -->
+<!--   labs(x = "Time (s)", y = "Tempo (BPM)") + -->
+<!--   theme_classic() -->
+<!-- ``` -->
 
 Column
 --------------------------------------------------
 
 ### "Burning of the Midnight Lamp": Tempo
 
-``` {r boml4, echo=FALSE}
-boml <-
-  get_tidy_audio_analysis(bomlID) |>
-  select(segments) |>
-  unnest(segments)
+<!-- ``` {r boml4, echo=FALSE} -->
+<!-- boml <- -->
+<!--   get_tidy_audio_analysis(bomlID) |> -->
+<!--   select(segments) |> -->
+<!--   unnest(segments) -->
 
-bomlplot <- boml |>
-  mutate(loudness_max_time = start + loudness_max_time) |>
-  arrange(loudness_max_time) |>
-  mutate(delta_loudness = loudness_max - lag(loudness_max)) |>
-  ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) +
-  geom_line() +
-  xlim(0, 30) +
-  theme_minimal() +
-  labs(x = "Time (s)", y = "Novelty")
+<!-- bomlplot <- boml |> -->
+<!--   mutate(loudness_max_time = start + loudness_max_time) |> -->
+<!--   arrange(loudness_max_time) |> -->
+<!--   mutate(delta_loudness = loudness_max - lag(loudness_max)) |> -->
+<!--   ggplot(aes(x = loudness_max_time, y = pmax(0, delta_loudness))) + -->
+<!--   geom_line() + -->
+<!--   xlim(0, 30) + -->
+<!--   theme_minimal() + -->
+<!--   labs(x = "Time (s)", y = "Novelty") -->
 
-ggplotly(bomlplot)
-```
+<!-- ggplotly(bomlplot) -->
+<!-- ``` -->
 
 ### "Burning of the Midnight Lamp": Pitches
 
-``` {r boml5, echo=FALSE}
-boml <-
-  get_tidy_audio_analysis(bomlID) |>
-  select(segments) |>
-  unnest(segments)
+<!-- ``` {r boml5, echo=FALSE} -->
+<!-- boml <- -->
+<!--   get_tidy_audio_analysis(bomlID) |> -->
+<!--   select(segments) |> -->
+<!--   unnest(segments) -->
 
-bomlplot <- boml |>
-  mutate(pitches = map(pitches, compmus_normalise, "clr")) |>
-  arrange(start) |>
-  mutate(pitches = map2(pitches, lag(pitches), `-`)) |>
-  slice(-1) |> 
-  compmus_gather_chroma() |> 
-  group_by(start, duration) |> 
-  summarise(novelty = sum(log1p(pmax(value, 0)))) |> 
-  ggplot(aes(x = start + duration / 2, y = novelty)) +
-  geom_line() +
-  xlim(0, 30) +
-  theme_minimal() +
-  labs(x = "Time (s)", y = "Novelty")
+<!-- bomlplot <- boml |> -->
+<!--   mutate(pitches = map(pitches, compmus_normalise, "clr")) |> -->
+<!--   arrange(start) |> -->
+<!--   mutate(pitches = map2(pitches, lag(pitches), `-`)) |> -->
+<!--   slice(-1) |>  -->
+<!--   compmus_gather_chroma() |>  -->
+<!--   group_by(start, duration) |>  -->
+<!--   summarise(novelty = sum(log1p(pmax(value, 0)))) |>  -->
+<!--   ggplot(aes(x = start + duration / 2, y = novelty)) + -->
+<!--   geom_line() + -->
+<!--   xlim(0, 30) + -->
+<!--   theme_minimal() + -->
+<!--   labs(x = "Time (s)", y = "Novelty") -->
 
-ggplotly(bomlplot)
-```
+<!-- ggplotly(bomlplot) -->
+<!-- ``` -->
 
 ### "The Burning of the Midnight Lamp": Tempogram
 
-```{r jimiHendrix7, echo=FALSE}
-boml <- get_tidy_audio_analysis(bomlID)
+<!-- ```{r jimiHendrix7, echo=FALSE} -->
+<!-- boml <- get_tidy_audio_analysis(bomlID) -->
 
-boml |>
-  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
-  ggplot(aes(x = time, y = bpm, fill = power)) +
-  geom_raster() +
-  scale_fill_viridis_c(guide = "none") +
-  labs(x = "Time (s)", y = "Tempo (BPM)") +
-  theme_classic()
-```
+<!-- boml |> -->
+<!--   tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |> -->
+<!--   ggplot(aes(x = time, y = bpm, fill = power)) + -->
+<!--   geom_raster() + -->
+<!--   scale_fill_viridis_c(guide = "none") + -->
+<!--   labs(x = "Time (s)", y = "Tempo (BPM)") + -->
+<!--   theme_classic() -->
+<!-- ``` -->
 
 
 Harmony and Chord {data-navmenu=Top\ Hit\ Analysis}
@@ -507,112 +771,7 @@ The graph shown is the chordogram for Tame Impala's "The Less I Know The Better"
 It was also interesting to note the evolution of the C minor from the beginning to end, as it had the darkest boxes at the start and finish but got lighter during the middle.
 
 
-Chromagram Analysis {data-navmenu=Top\ Hit\ Analysis}
-==============================================================================
 
-<!-- ``` {r tameImpala2, echo=FALSE} -->
-<!-- library(ggplot2) -->
-<!-- library(tidyverse) -->
-<!-- library(spotifyr) -->
-<!-- library(compmus) -->
-
-<!-- theLessIKnowID <- '6K4t31amVTZDgR3sKmwUJJ' -->
-
-<!-- tlik <- -->
-<!--   get_tidy_audio_analysis(theLessIKnowID) |> -->
-<!--   select(segments) |> -->
-<!--   unnest(segments) |> -->
-<!--   select(start, duration, pitches) -->
-
-<!-- tlik |> -->
-<!--   mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |> -->
-<!--   compmus_gather_chroma() |>  -->
-<!--   ggplot( -->
-<!--     aes( -->
-<!--       x = start + duration / 2, -->
-<!--       width = duration, -->
-<!--       y = pitch_class, -->
-<!--       fill = value -->
-<!--     ) -->
-<!--   ) + -->
-<!--   geom_tile() + -->
-<!--   labs(x = "Time (s)", y = NULL, fill = "Magnitude") + -->
-<!--   theme_minimal() + -->
-<!--   scale_fill_viridis_c() -->
-<!-- ``` -->
-
-<!-- *** -->
-
-<!-- This is the chromagram of Tame Impala's biggest hit, "The Less I Know The Better".  -->
-<!-- -- ADD MORE ANALYSIS --  -->
-
-
-<!-- ### "The Less I Know The Better" Timbre Cepstrogram Analysis -->
-
-<!-- ``` {r tameImpala3, echo=FALSE} -->
-<!-- library(ggplot2) -->
-<!-- library(tidyverse) -->
-<!-- library(spotifyr) -->
-<!-- library(compmus) -->
-
-<!-- theLessIKnowID <- '6K4t31amVTZDgR3sKmwUJJ' -->
-
-<!-- tlik <- -->
-<!--   get_tidy_audio_analysis(theLessIKnowID) |> # Change URI. -->
-<!--   compmus_align(tatums, segments) |>                     # Change `bars` -->
-<!--   select(tatums) |>                                      #   in all three -->
-<!--   unnest(tatums) |>                                      #   of these lines. -->
-<!--   mutate( -->
-<!--     pitches = -->
-<!--       map(segments, -->
-<!--         compmus_summarise, pitches, -->
-<!--         method = "rms", norm = "manhattan"              # Change summary & norm. -->
-<!--       ) -->
-<!--   ) |> -->
-<!--   mutate( -->
-<!--     timbre = -->
-<!--       map(segments, -->
-<!--         compmus_summarise, timbre, -->
-<!--         method = "rms", norm = "manhattan"              # Change summary & norm. -->
-<!--       ) -->
-<!--   ) -->
-
-<!-- tlik |> -->
-<!--   compmus_gather_timbre() |> -->
-<!--   ggplot( -->
-<!--     aes( -->
-<!--       x = start + duration / 2, -->
-<!--       width = duration, -->
-<!--       y = basis, -->
-<!--       fill = value -->
-<!--     ) -->
-<!--   ) + -->
-<!--   geom_tile() + -->
-<!--   labs(x = "Time (s)", y = NULL, fill = "Magnitude") + -->
-<!--   scale_fill_viridis_c() +                               -->
-<!--   theme_classic() -->
-
-<!-- tlik |> -->
-<!--   compmus_self_similarity(timbre, "cosine") |>  -->
-<!--   ggplot( -->
-<!--     aes( -->
-<!--       x = xstart + xduration / 2, -->
-<!--       width = xduration, -->
-<!--       y = ystart + yduration / 2, -->
-<!--       height = yduration, -->
-<!--       fill = d -->
-<!--     ) -->
-<!--   ) + -->
-<!--   geom_tile() + -->
-<!--   coord_fixed() + -->
-<!--   scale_fill_viridis_c(guide = "none") + -->
-<!--   theme_classic() + -->
-<!--   labs(x = "", y = "") -->
-<!-- ``` -->
-
-The graph to the left is a cepstrogram that represents tatums in the song "The Less I Know The Better", calculated using the Manhattan distance. There are clear changes in multiple areas. For example, c02 goes back and forth between high magnitudes and low magnitudes. c04 and c06 both start with a relatively low magnitude, then switches to a high magnitude for the rest of the track.
-
-The graph to the right is a self-similarity matrix.
 
 
 Conclusion
