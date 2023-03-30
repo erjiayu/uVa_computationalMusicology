@@ -54,6 +54,9 @@ library(tidyverse)
 library(spotifyr)
 library(compmus)
 library(plotly)
+library(ggdendro)
+library(heatmaply)
+library(tidymodels)
 
 tameImpala <- get_artist_audio_features('tame impala')
 jimiHendrix <- get_artist_audio_features('jimi hendrix')
@@ -66,6 +69,108 @@ elecLadylandFeatures <- get_track_audio_features(elecLadyland)
 
 tlikID <- '6K4t31amVTZDgR3sKmwUJJ'
 bomlID <- '36SULeBeglappJysOY6WzQ'
+
+circshift <- function(v, n) {
+  if (n == 0) v else c(tail(v, n), head(v, -n))
+}
+
+#      C     C#    D     Eb    E     F     F#    G     Ab    A     Bb    B
+major_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    0,    0)
+minor_chord <-
+  c(   1,    0,    0,    1,    0,    0,    0,    1,    0,    0,    0,    0)
+seventh_chord <-
+  c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    1,    0)
+
+major_key <-
+  c(6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88)
+minor_key <-
+  c(6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17)
+
+chord_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:7", circshift(seventh_chord, 6),
+    "Gb:maj", circshift(major_chord, 6),
+    "Bb:min", circshift(minor_chord, 10),
+    "Db:maj", circshift(major_chord, 1),
+    "F:min", circshift(minor_chord, 5),
+    "Ab:7", circshift(seventh_chord, 8),
+    "Ab:maj", circshift(major_chord, 8),
+    "C:min", circshift(minor_chord, 0),
+    "Eb:7", circshift(seventh_chord, 3),
+    "Eb:maj", circshift(major_chord, 3),
+    "G:min", circshift(minor_chord, 7),
+    "Bb:7", circshift(seventh_chord, 10),
+    "Bb:maj", circshift(major_chord, 10),
+    "D:min", circshift(minor_chord, 2),
+    "F:7", circshift(seventh_chord, 5),
+    "F:maj", circshift(major_chord, 5),
+    "A:min", circshift(minor_chord, 9),
+    "C:7", circshift(seventh_chord, 0),
+    "C:maj", circshift(major_chord, 0),
+    "E:min", circshift(minor_chord, 4),
+    "G:7", circshift(seventh_chord, 7),
+    "G:maj", circshift(major_chord, 7),
+    "B:min", circshift(minor_chord, 11),
+    "D:7", circshift(seventh_chord, 2),
+    "D:maj", circshift(major_chord, 2),
+    "F#:min", circshift(minor_chord, 6),
+    "A:7", circshift(seventh_chord, 9),
+    "A:maj", circshift(major_chord, 9),
+    "C#:min", circshift(minor_chord, 1),
+    "E:7", circshift(seventh_chord, 4),
+    "E:maj", circshift(major_chord, 4),
+    "G#:min", circshift(minor_chord, 8),
+    "B:7", circshift(seventh_chord, 11),
+    "B:maj", circshift(major_chord, 11),
+    "D#:min", circshift(minor_chord, 3)
+  )
+
+key_templates <-
+  tribble(
+    ~name, ~template,
+    "Gb:maj", circshift(major_key, 6),
+    "Bb:min", circshift(minor_key, 10),
+    "Db:maj", circshift(major_key, 1),
+    "F:min", circshift(minor_key, 5),
+    "Ab:maj", circshift(major_key, 8),
+    "C:min", circshift(minor_key, 0),
+    "Eb:maj", circshift(major_key, 3),
+    "G:min", circshift(minor_key, 7),
+    "Bb:maj", circshift(major_key, 10),
+    "D:min", circshift(minor_key, 2),
+    "F:maj", circshift(major_key, 5),
+    "A:min", circshift(minor_key, 9),
+    "C:maj", circshift(major_key, 0),
+    "E:min", circshift(minor_key, 4),
+    "G:maj", circshift(major_key, 7),
+    "B:min", circshift(minor_key, 11),
+    "D:maj", circshift(major_key, 2),
+    "F#:min", circshift(minor_key, 6),
+    "A:maj", circshift(major_key, 9),
+    "C#:min", circshift(minor_key, 1),
+    "E:maj", circshift(major_key, 4),
+    "G#:min", circshift(minor_key, 8),
+    "B:maj", circshift(major_key, 11),
+    "D#:min", circshift(minor_key, 3)
+  )
+
+get_conf_mat <- function(fit) {
+  outcome <- .get_tune_outcome_names(fit)
+  fit |> 
+    collect_predictions() |> 
+    conf_mat(truth = outcome, estimate = .pred_class)
+}  
+
+get_pr <- function(fit) {
+  fit |> 
+    conf_mat_resampled() |> 
+    group_by(Prediction) |> mutate(precision = Freq / sum(Freq)) |> 
+    group_by(Truth) |> mutate(recall = Freq / sum(Freq)) |> 
+    ungroup() |> filter(Prediction == Truth) |> 
+    select(class = Prediction, precision, recall)
+} 
 
 ```
 
@@ -121,7 +226,7 @@ Jimi Hendrix was an American musician, singer, and songwriter who is widely rega
 <iframe src="https://open.spotify.com/embed/album/5z090LQztiqh13wYspQvKQ?utm_source=generator" height="100%" width="100%" style="border: none;" allowfullscreen="" allow="autoplay" data-external="1"></iframe>
 
 
-Tempo vs. Energy {data-navmenu=Album\ Analysis}
+Tempo vs. Energy {data-navmenu=Track-Level\ Analysis}
 =====================================================================
 
 Column {.tabset data-width=30%}
@@ -195,7 +300,7 @@ In general, the two albums are actually very similar in the four factors involve
 
 This was interesting to me because I had thought that a faster tempo is often correlated with more energy, as fast music often brings people to dance and closer to experiencing positivity. However, when examining these two albums, it seems like Currents had a quicker tempo but remained relatively neutral in inducing emotions in its audience, while The Burning of the Midnight Lamp had a slower tempo but was able to bring out more in its listeners. 
 
-Key Histograms {data-orientation=rows data-navmenu=Album\ Analysis}
+Key Histograms {data-orientation=rows data-navmenu=Track-Level\ Analysis}
 ===================================================
 
 Row {data-height=75}
@@ -300,7 +405,7 @@ The chromagram for Tame Impala's top hit, "The Less I Know The Better", is compu
 
 The chromagram for Jimi Hendrix's top hit, "The Burning of the Midnight Lamp", is also computed with Euclidean distance. Compare to "The Less I Know The Better", this chromagram displays much less variation across the use of pitches. Jimi Hendrix mostly focused on pitches F, E, D, and C; the overlap of segments of these pitches suggest that he tried to focus on harmony rather than alternating sequences of instruments. This is also supported by instances where magnitudes of these pitches spike together. For example, around 70sec and 150sec, pitches F and C both show a high magnitude that last about 5-7 seconds. They also correspond to the beginning of the two intense guitar solos during the song, showing how much Hendrix places emphasis on creating harmonies between the drums and the guitar. 
 
-Cepstrograms {data-navmenu=Top\ Hit\ Analysis}
+Self-Similarity Matrices {data-navmenu=Top\ Hit\ Analysis}
 ==============================================================================
 
 Column {.tabset}
@@ -478,43 +583,113 @@ bind_rows(
 Column
 ------------------------------------------------------------------------------
 
-### Background
+### Background {data-height=100}
 
-The two self-similarity matrices generated on the left are 
+The two self-similarity matrices on the left are each summarized at the bar level and illustrate pitch- and timbre-based self-similarity within the top hits of the two artists. 
 
 ### "The Less I Know The Better" Analysis
 
-Analysis
+In the chroma-based self-similarity matrix for "The Less I Know The Better', there are few clear parallel diagonal lines; instead, it mostly presents a checkerboard composed of small blocks. The checkerboard means that there are a lot of repeating notes or motifs that happen throughout the entire song, and its composition of small blocks means that these repetitive themes are fairly short and often change quickly and frequently, creating a complex harmonic texture. This corresponds to the chord sequence that "The Less I Know The Better" uses -- a four-note pattern that is frequently heard throughout the verse section of the song. It is composed of the chords Bm, E, G, and F#, and it resembles the signature guitar riff. Starting from around 70sec and 145sec, we can see the start of a new section of small blocks, and these represent the chorus parts of the song. They use a slightly different four-note pattern with chords Bm, F#, G, F#, hence creating a dividing line in the matrix.
+
+In the timbre-based self-similarity matrix, we can see a few yellow lines that cross throughout the entire song, which resemble a sudden change in timbre. One of the most notable ones happens during the first 10 seconds, and this actually represents the guitar solo at the beginning of the song that is not seen anywhere else in the rest of the song. There are also yellow lines throughout the matrix that divide the verse sections from the chorus sections, such as at 70sec and 100sec, and these indicate short periods of time where vocals disappear and pure instruments make up the bridge between the two sections. 
 
 ### "The Burning of the Midnight Lamp" Analysis
 
-Analysis
+In the chroma-based self-similarity matrix for "The Burning of the Midnight Lamp", there are a few sections with clear parallel diagonal lines that represent repeating motives. For example, the section from 30sec to 60sec is repeated again from 70sec to 100sec and 150sec to 180sec. This indicates the verse sections which are repeated 3 times throughout the entire song. The bright lines that separate these sections that last from 60sec to 70sec and 145sec to 155sec represent the bridge with no vocals; however, these bridges are different every time and are therefore not homogeneous.
+
+In the timbre-based self-similarity matrix, there is obvious yellow line that occurs at 60sec to 65sec that is not seen anywhere else in the rest of the graph. This significant change in timbre is the bridge between the first chorus and the second bridge, where there are only vocals and no instruments. This is not repeated anywhere throughout the rest of the song; hence, the yellow line is very prominent. The second, fainter yellow line occurs after the second chorus around 110sec. This is the bridge that allows Hendrix to transition from traditional rock to more psychedelic guitar riffs that produce more distorted sounds. It is composed of a very short period of no instruments and is then followed by an intense arrangements of instruments. This contributes to building up the tension and energy for the last sections of the song. 
+
+Chordograms {data-navmenu=Top\ Hit\ Analysis}
+===================================================
+
+Column
+---------------------------------------------------
+
+### "The Less I know The Better" Analysis
+
+The graph shown is the chordogram for Tame Impala's "The Less I Know The Better", and it's interesting to note that every "vertical column" of the diagram represents a different harmony in the background of the sun. For the first 60 seconds of the song, indicated by the first four major vertical sections, we can see pops of yellow for the F major and the B major. They correlate with the high-pitched chimes that Tame Impala inserts into the instrumentals of the song. Between seconds 70-100, the colors across all majors are very similar shades of green; this was when the chorus happened, and the instrumentals were more mellow to support the lyrics of the chorus. The last 100 seconds of the song saw a very consistent harmony. 
+
+It was also interesting to note the evolution of the C minor from the beginning to end, as it had the darkest boxes at the start and finish but got lighter during the middle.
+
+### "The Burning of the Midnight Lamp" Analysis
 
 
-<!-- The graph to the left is a cepstrogram that represents tatums in the song "The Less I Know The Better", calculated using the Manhattan distance. There are clear changes in multiple areas. For example, c02 goes back and forth between high magnitudes and low magnitudes. c04 and c06 both start with a relatively low magnitude, then switches to a high magnitude for the rest of the track. -->
+Column {.tabset}
+---------------------------------------------------
 
-<!-- The graph to the right is a self-similarity matrix. -->
+### "The Less I Know The Better"
+
+``` {r tameImpala5, echo=FALSE}
+
+tlik <-
+  get_tidy_audio_analysis(tlikID) |>
+  compmus_align(sections, segments) |>
+  select(sections) |>
+  unnest(sections) |>
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  )
+
+tlik |>
+  compmus_match_pitch_template(
+    key_templates,         # Change to chord_templates if descired
+    method = "manhattan",  # Try different distance metrics
+    norm = "manhattan"     # Try different norms
+  ) |>
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "")
+
+```
+
+### "The Burning of the Midnight Lamp"
+
+``` {r jimiHendrix5, echo=FALSE}
+
+boml <-
+  get_tidy_audio_analysis(bomlID) |>
+  compmus_align(sections, segments) |>
+  select(sections) |>
+  unnest(sections) |>
+  mutate(
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      )
+  )
+
+boml |>
+  compmus_match_pitch_template(
+    chord_templates,         # Change to chord_templates if descired
+    method = "manhattan",  # Try different distance metrics
+    norm = "manhattan"     # Try different norms
+  ) |>
+  ggplot(
+    aes(x = start + duration / 2, width = duration, y = name, fill = d)
+  ) +
+  geom_tile() +
+  scale_fill_viridis_c(guide = "none") +
+  theme_minimal() +
+  labs(x = "Time (s)", y = "")
+
+```
 
 Tempograms {data-navmenu=Top\ Hit\ Analysis}
 ===================================================
 
-Column {.tabset}
--------------------------------------------------
-
-### "The Less I Know The Better"
-
-Using the energy-based novelty function, we can see that the tempo in the first 30 seconds of "The Less I Know The Better" is quite interesting. It seems to be grouped in triplets. -- will add more analysis --
-
-On the other hand, its pitches seem to follow a very consistent pattern in the first 30 seconds. A peak will first occur, then it will be followed by a series of 2 smaller peaks. This can be seen in periods such as between 20s - 22.5s. -- will add more analysis -- 
-
-### "Burning of the Midnight Lamp"
-
-Analysis
-
 Column 
 -------------------------------------------------
 
-### "The Less I Know The Better": Tempo
+<!-- ### "The Less I Know The Better": Tempo -->
 
 <!-- ``` {r tameImpala5, echo=FALSE} -->
 <!-- tlik <- -->
@@ -535,7 +710,7 @@ Column
 <!-- ggplotly(tlikplot) -->
 <!-- ``` -->
 
-### "The Less I Know The Better": Pitches
+<!-- ### "The Less I Know The Better": Pitches -->
 
 <!-- ``` {r tameImpala6, echo=FALSE} -->
 <!-- tlik <- -->
@@ -560,24 +735,38 @@ Column
 <!-- ggplotly(tlikplot) -->
 <!-- ``` -->
 
-### "The Less I Know The Better": Tempogram
+### "The Less I Know The Better" {data-height=50%}
 
-<!-- ```{r tameImpala7, echo=FALSE} -->
-<!-- tlik <- get_tidy_audio_analysis(tlikID) -->
+```{r tameImpala7, echo=FALSE}
+tlik <- get_tidy_audio_analysis(tlikID)
 
-<!-- tlik |> -->
-<!--   tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |> -->
-<!--   ggplot(aes(x = time, y = bpm, fill = power)) + -->
-<!--   geom_raster() + -->
-<!--   scale_fill_viridis_c(guide = "none") + -->
-<!--   labs(x = "Time (s)", y = "Tempo (BPM)") + -->
-<!--   theme_classic() -->
-<!-- ``` -->
+tlik |>
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+```
+
+### "The Burning of the Midnight Lamp" {data-height=50%}
+
+```{r jimiHendrix7, echo=FALSE}
+boml <- get_tidy_audio_analysis(bomlID)
+
+boml |>
+  tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |>
+  ggplot(aes(x = time, y = bpm, fill = power)) +
+  geom_raster() +
+  scale_fill_viridis_c(guide = "none") +
+  labs(x = "Time (s)", y = "Tempo (BPM)") +
+  theme_classic()
+```
 
 Column
 --------------------------------------------------
 
-### "Burning of the Midnight Lamp": Tempo
+<!-- ### "Burning of the Midnight Lamp": Tempo -->
 
 <!-- ``` {r boml4, echo=FALSE} -->
 <!-- boml <- -->
@@ -598,7 +787,7 @@ Column
 <!-- ggplotly(bomlplot) -->
 <!-- ``` -->
 
-### "Burning of the Midnight Lamp": Pitches
+<!-- ### "Burning of the Midnight Lamp": Pitches -->
 
 <!-- ``` {r boml5, echo=FALSE} -->
 <!-- boml <- -->
@@ -623,157 +812,83 @@ Column
 <!-- ggplotly(bomlplot) -->
 <!-- ``` -->
 
-### "The Burning of the Midnight Lamp": Tempogram
+### "The Less I Know The Better" Analysis
 
-<!-- ```{r jimiHendrix7, echo=FALSE} -->
-<!-- boml <- get_tidy_audio_analysis(bomlID) -->
+"The Less I Know The Better" has a steady and consistent tempo throughout the song, as the tempogram on the right has a relatively straight bright line throughout the entire song. Spotify estimates the tempo to be around 116-118 BPM, which is moderate to slightly fast. As it can be seen from the tempogram, it features a consistent beat with drums, bass, and various electronic and acoustic instruments adding layers to the rhythm. There are some slight variations in the rhythmic patterns throughout the song, such as at around 40sec, 100sec, and 150sec, where very faint vertical yellow lines can be seen. They indicate the short bridges that connect two verse sections and involve a slight variation in the use of instruments. For example, at 100sec, an extra drum beat is added. At 150sec, the drums and bass drop out briefly to create a break, then come back in a more intense rhythm. These sections are used to build up the tension in the song and to contribute to the creation of a groove; however, since their main purpose is not to change the tempo, "The Less I Know The Better" still maintains a relatively consisten tempo throughout the entire song. 
 
-<!-- boml |> -->
-<!--   tempogram(window_size = 8, hop_size = 1, cyclic = TRUE) |> -->
-<!--   ggplot(aes(x = time, y = bpm, fill = power)) + -->
-<!--   geom_raster() + -->
-<!--   scale_fill_viridis_c(guide = "none") + -->
-<!--   labs(x = "Time (s)", y = "Tempo (BPM)") + -->
-<!--   theme_classic() -->
-<!-- ``` -->
+### "The Burning of the Midnight Lamp" Analysis
+
+"The Burning of the Midnight Lamp" does not have a steady and consistent tempo, unlike "The Less I Know The Better". The tempograms depicts the general tempo to be within the range of 140 to 160 BPM; however, there are a lot of variations within the rhythmic pattern for every section. The song begins with a slow, steady drum beat for the first guitar riff, with the tempo at about 140 BPM. During the verse sections, however, the tempo speeds up and continues doing so as the guitar riff becomes more and more intense until it reaches about 155 BPM. Then, the bridge between two verse sections happen, dropping the tempo back to 140 BPM. This trend occurs two more times. However, the tempogram begins to show more and more scattered yellow areas as the song goes on, perhaps due to the increasingly complex composition of instruments that are added to build up the climax of the song. The last 20-30sec of the song is the most prominent guitar riff, and it is also where the tempogram shows a lot of variations in its activity. This is most likely due to Spotify listening to a variety of different instruments, hence creating a complex and diverse section of the tempo.
 
 
-Harmony and Chord {data-navmenu=Top\ Hit\ Analysis}
+Clustering
 ===================================================
 
-### title
-
-<!-- ``` {r tameImpala4, echo=FALSE} -->
-<!-- library(ggplot2) -->
-<!-- library(tidyverse) -->
-<!-- library(spotifyr) -->
-<!-- library(compmus) -->
-
-<!-- theLessIKnowID <- '6K4t31amVTZDgR3sKmwUJJ' -->
-
-<!-- circshift <- function(v, n) { -->
-<!--   if (n == 0) v else c(tail(v, n), head(v, -n)) -->
-<!-- } -->
-
-<!-- #      C     C#    D     Eb    E     F     F#    G     Ab    A     Bb    B -->
-<!-- major_chord <- -->
-<!--   c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    0,    0) -->
-<!-- minor_chord <- -->
-<!--   c(   1,    0,    0,    1,    0,    0,    0,    1,    0,    0,    0,    0) -->
-<!-- seventh_chord <- -->
-<!--   c(   1,    0,    0,    0,    1,    0,    0,    1,    0,    0,    1,    0) -->
-
-<!-- major_key <- -->
-<!--   c(6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88) -->
-<!-- minor_key <- -->
-<!--   c(6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17) -->
-
-<!-- chord_templates <- -->
-<!--   tribble( -->
-<!--     ~name, ~template, -->
-<!--     "Gb:7", circshift(seventh_chord, 6), -->
-<!--     "Gb:maj", circshift(major_chord, 6), -->
-<!--     "Bb:min", circshift(minor_chord, 10), -->
-<!--     "Db:maj", circshift(major_chord, 1), -->
-<!--     "F:min", circshift(minor_chord, 5), -->
-<!--     "Ab:7", circshift(seventh_chord, 8), -->
-<!--     "Ab:maj", circshift(major_chord, 8), -->
-<!--     "C:min", circshift(minor_chord, 0), -->
-<!--     "Eb:7", circshift(seventh_chord, 3), -->
-<!--     "Eb:maj", circshift(major_chord, 3), -->
-<!--     "G:min", circshift(minor_chord, 7), -->
-<!--     "Bb:7", circshift(seventh_chord, 10), -->
-<!--     "Bb:maj", circshift(major_chord, 10), -->
-<!--     "D:min", circshift(minor_chord, 2), -->
-<!--     "F:7", circshift(seventh_chord, 5), -->
-<!--     "F:maj", circshift(major_chord, 5), -->
-<!--     "A:min", circshift(minor_chord, 9), -->
-<!--     "C:7", circshift(seventh_chord, 0), -->
-<!--     "C:maj", circshift(major_chord, 0), -->
-<!--     "E:min", circshift(minor_chord, 4), -->
-<!--     "G:7", circshift(seventh_chord, 7), -->
-<!--     "G:maj", circshift(major_chord, 7), -->
-<!--     "B:min", circshift(minor_chord, 11), -->
-<!--     "D:7", circshift(seventh_chord, 2), -->
-<!--     "D:maj", circshift(major_chord, 2), -->
-<!--     "F#:min", circshift(minor_chord, 6), -->
-<!--     "A:7", circshift(seventh_chord, 9), -->
-<!--     "A:maj", circshift(major_chord, 9), -->
-<!--     "C#:min", circshift(minor_chord, 1), -->
-<!--     "E:7", circshift(seventh_chord, 4), -->
-<!--     "E:maj", circshift(major_chord, 4), -->
-<!--     "G#:min", circshift(minor_chord, 8), -->
-<!--     "B:7", circshift(seventh_chord, 11), -->
-<!--     "B:maj", circshift(major_chord, 11), -->
-<!--     "D#:min", circshift(minor_chord, 3) -->
-<!--   ) -->
-
-<!-- key_templates <- -->
-<!--   tribble( -->
-<!--     ~name, ~template, -->
-<!--     "Gb:maj", circshift(major_key, 6), -->
-<!--     "Bb:min", circshift(minor_key, 10), -->
-<!--     "Db:maj", circshift(major_key, 1), -->
-<!--     "F:min", circshift(minor_key, 5), -->
-<!--     "Ab:maj", circshift(major_key, 8), -->
-<!--     "C:min", circshift(minor_key, 0), -->
-<!--     "Eb:maj", circshift(major_key, 3), -->
-<!--     "G:min", circshift(minor_key, 7), -->
-<!--     "Bb:maj", circshift(major_key, 10), -->
-<!--     "D:min", circshift(minor_key, 2), -->
-<!--     "F:maj", circshift(major_key, 5), -->
-<!--     "A:min", circshift(minor_key, 9), -->
-<!--     "C:maj", circshift(major_key, 0), -->
-<!--     "E:min", circshift(minor_key, 4), -->
-<!--     "G:maj", circshift(major_key, 7), -->
-<!--     "B:min", circshift(minor_key, 11), -->
-<!--     "D:maj", circshift(major_key, 2), -->
-<!--     "F#:min", circshift(minor_key, 6), -->
-<!--     "A:maj", circshift(major_key, 9), -->
-<!--     "C#:min", circshift(minor_key, 1), -->
-<!--     "E:maj", circshift(major_key, 4), -->
-<!--     "G#:min", circshift(minor_key, 8), -->
-<!--     "B:maj", circshift(major_key, 11), -->
-<!--     "D#:min", circshift(minor_key, 3) -->
-<!--   ) -->
-
-<!-- tlik <- -->
-<!--   get_tidy_audio_analysis(theLessIKnowID) |> -->
-<!--   compmus_align(sections, segments) |> -->
-<!--   select(sections) |> -->
-<!--   unnest(sections) |> -->
-<!--   mutate( -->
-<!--     pitches = -->
-<!--       map(segments, -->
-<!--         compmus_summarise, pitches, -->
-<!--         method = "mean", norm = "manhattan" -->
-<!--       ) -->
-<!--   ) -->
-
-<!-- tlik |>  -->
-<!--   compmus_match_pitch_template( -->
-<!--     key_templates,         # Change to chord_templates if descired -->
-<!--     method = "euclidean",  # Try different distance metrics -->
-<!--     norm = "manhattan"     # Try different norms -->
-<!--   ) |> -->
-<!--   ggplot( -->
-<!--     aes(x = start + duration / 2, width = duration, y = name, fill = d) -->
-<!--   ) + -->
-<!--   geom_tile() + -->
-<!--   scale_fill_viridis_c(guide = "none") + -->
-<!--   theme_minimal() + -->
-<!--   labs(x = "Time (s)", y = "") -->
-
-<!-- ``` -->
-
-The graph shown is the chordogram for Tame Impala's "The Less I Know The Better", and it's interesting to note that every "vertical column" of the diagram represents a different harmony in the background of the sun. For the first 60 seconds of the song, indicated by the first four major vertical sections, we can see pops of yellow for the F major and the B major. They correlate with the high-pitched chimes that Tame Impala inserts into the instrumentals of the song. Between seconds 70-100, the colors across all majors are very similar shades of green; this was when the chorus happened, and the instrumentals were more mellow to support the lyrics of the chorus. The last 100 seconds of the song saw a very consistent harmony. 
-
-It was also interesting to note the evolution of the C minor from the beginning to end, as it had the darkest boxes at the start and finish but got lighter during the middle.
+Column
+---------------------------------------------------
 
 
+Column
+---------------------------------------------------
 
+```{r tameImpala8, echo=FALSE}
+ti <-
+  get_playlist_audio_features("tameimpala", "37i9dQZF1DZ06evO3n0Aus") |>
+  add_audio_analysis() |>
+  mutate(
+    segments = map2(segments, key, compmus_c_transpose),
+    pitches =
+      map(segments,
+        compmus_summarise, pitches,
+        method = "mean", norm = "manhattan"
+      ),
+    timbre =
+      map(
+        segments,
+        compmus_summarise, timbre,
+        method = "mean"
+      )
+  ) |>
+  mutate(pitches = map(pitches, compmus_normalise, "clr")) |>
+  mutate_at(vars(pitches, timbre), map, bind_rows) |>
+  unnest(cols = c(pitches, timbre))
 
+tiFeatures <-
+  recipe(
+    track.name ~
+      danceability +
+      energy +
+      loudness +
+      speechiness +
+      acousticness +
+      instrumentalness +
+      liveness +
+      valence +
+      tempo +
+      duration +
+      C + `C#|Db` + D + `D#|Eb` +
+      E + `F` + `F#|Gb` + G +
+      `G#|Ab` + A + `A#|Bb` + B +
+      c01 + c02 + c03 + c04 + c05 + c06 +
+      c07 + c08 + c09 + c10 + c11 + c12,
+    data = ti
+  ) |>
+  step_center(all_predictors()) |>
+  step_scale(all_predictors()) |> 
+  # step_range(all_predictors()) |> 
+  prep(ti |> mutate(track.name = str_trunc(track.name, 20))) |>
+  juice() |>
+  column_to_rownames("track.name")
+
+tiDistance <- dist(halloween_juice, method = "euclidean")
+
+tiDistance |> 
+  hclust(method = "single") |> # Try single, average, and complete.
+  dendro_data() |>
+  ggdendrogram()
+
+```
 
 Conclusion
-=====================================  
+===================================================
 
