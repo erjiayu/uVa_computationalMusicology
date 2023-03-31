@@ -607,12 +607,11 @@ Column
 
 ### "The Less I know The Better" Analysis
 
-The graph shown is the chordogram for Tame Impala's "The Less I Know The Better", and it's interesting to note that every "vertical column" of the diagram represents a different harmony in the background of the sun. For the first 60 seconds of the song, indicated by the first four major vertical sections, we can see pops of yellow for the F major and the B major. They correlate with the high-pitched chimes that Tame Impala inserts into the instrumentals of the song. Between seconds 70-100, the colors across all majors are very similar shades of green; this was when the chorus happened, and the instrumentals were more mellow to support the lyrics of the chorus. The last 100 seconds of the song saw a very consistent harmony. 
-
-It was also interesting to note the evolution of the C minor from the beginning to end, as it had the darkest boxes at the start and finish but got lighter during the middle.
+The chordogram generated to the right is based off of individual sections in "The Less I Know The Better", and it is interesting to see the differences in chords used for every part of the song. The song starts off with a repeated guitar riff, using chords such as F, G, and Eb. It then transitions to the verse sections, where the use of G minor, F, Bb major and D minor became more prominent. This also contributes to a more melancholy section, where the song is more introspective. At 70sec, the song transitions to the chorus section, where we see a drastic change in the chords used. Eb major is still used, but the distribution of chords used becomes more even, creating a sense of harmony. This pattern of verse section and chorus section repeats again, before the song ends with an outro that uses chords similar to the verse section. 
 
 ### "The Burning of the Midnight Lamp" Analysis
 
+The chordogram to the right is also based off of individual sections in "The Burning of the Midnight Lamp", and it features a complex and diverse set of chord progressions that help to create the signature psychedelic and otherworldly sound. It opens with a signature guitar riff that uses chords D# minor, F# minor, and Gb major, thus creating a dreamy and mysterious atmosphere. As it transitions into the verse section at 25sec, the chord distributions even out, before following by the chorus section which focuses on A major and A minor to create a catchy and upbeat chord progression. This pattern continues until 140sec, where D# minor, B major, and G# minor come into play again to support the guitar riff. Overall, "The Burning of the Midnight Lamp" features a wide range of chord progressions that help to create a sense of tension and release.
 
 Column {.tabset}
 ---------------------------------------------------
@@ -636,7 +635,7 @@ tlik <-
 
 tlik |>
   compmus_match_pitch_template(
-    key_templates,         # Change to chord_templates if descired
+    chord_templates,         # Change to chord_templates if descired
     method = "manhattan",  # Try different distance metrics
     norm = "manhattan"     # Try different norms
   ) |>
@@ -880,10 +879,10 @@ tiFeatures <-
   juice() |>
   column_to_rownames("track.name")
 
-tiDistance <- dist(halloween_juice, method = "euclidean")
+tiDistance <- dist(tiFeatures, method = "euclidean")
 
 tiDistance |> 
-  hclust(method = "single") |> # Try single, average, and complete.
+  hclust(method = "complete") |> # Try single, average, and complete.
   dendro_data() |>
   ggdendrogram()
 
