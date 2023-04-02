@@ -182,9 +182,9 @@ Column {.sidebar data-width=400}
 
 ### The Secrets Behind Psychedelic Rock
 
-Psychedelic rock emerged as a style of rock music in early 1960s. As you may have guessed from its name, the inspiration for this genre mainly came from hallucinogens that can "expand your mind" and guide you into an otherworldly trip (think LSD or magic mushrooms). It uses intense electronic sound effects and extended instrumental solos to imitate the drug-induced state that psychedelic users go through. 
+Psychedelic rock emerged as a style of rock music in the early 1960s. As you may have guessed from its name, the inspiration for this genre mainly came from hallucinogens that can "expand your mind" and guide you into an otherworldly trip (think LSD or magic mushrooms). It uses intense electronic sound effects and extended instrumental solos to imitate the drug-induced state that psychedelic users go through. 
 
-For this project, I will be mainly focusing on the secrets in the evolution of psychedelic rock from when it was born to today -- what techniques were used differently and how did that change what the songs want to convey? Specifically, I will be focusing on two bands that represent an era in psychedelic rock: Jimi Hendrix (who is almost synonymous with psychedelic rock when it was born) and Tame Impala (widely regarded as one of the most successful modern psychedelic rock bands).
+For this project, I will be mainly focusing on the secrets in psychedelic rock from when it was born to today -- what techniques were used differently and how did that change what the songs want to convey? Specifically, I will be focusing on two bands that represent an era in psychedelic rock: Jimi Hendrix (who is almost synonymous with psychedelic rock when it was born) and Tame Impala (widely regarded as one of the most successful modern psychedelic rock bands).
 
 To the right is a brief background of both bands as well as their playlists -- feel free to take a look and get familiar with their music! 
 
@@ -262,7 +262,7 @@ Column {.tabset data-width=30%}
 <!-- # ``` -->
 
 ```{r tameimpala1, echo=FALSE}
-p <- ggplot(currentsFeatures, aes(x = tempo, y = energy, size = valence, color = mode)) + geom_point() + ggtitle("Currents")
+p <- ggplot(currentsFeatures, aes(x = tempo, y = energy, size = valence, color = loudness)) + geom_point() + ggtitle("Currents")
 ggplotly(p)
 currentsMeanTempo <- currentsFeatures %>% summarize(meanTempo = mean(tempo), meanEnergy = mean(energy))
 ```
@@ -271,7 +271,7 @@ currentsMeanTempo <- currentsFeatures %>% summarize(meanTempo = mean(tempo), mea
 
 Tame Impala's album, Currents, generally follows a pretty fast BPM that falls between 100 - 150, with a median of 125.01 BPM. Almost all thirteen songs but three fall within this range. It also has a very high energy level -- eleven songs have an energy level that is greater than 0.6, with the album median at about 0.74 From this, we can infer that the album is very energetic and feels loud and fast. In addition to that, the majority of the songs use major scales (indicated by blue circles that represent a major as a 1 in the plot).
 
-It's interesting to note that the valence levels of this album is very neutral. Its median is at 0.45, meaning that its musical positiveness is not at either extreme. It is very neutral despite its high energy levels and its use of major scales, which are typically associated with creating a happy or uplifting mood. 
+It's interesting to note that the valence levels of this album is very neutral. Its median is at 0.45, meaning that its musical positiveness is not at either extreme. It is very neutral despite its high energy levels and its use of major scales, which are typically associated with creating a happy or uplifting mood. In addition to that, energy is positively correlated with loudness -- the lower a song's loudness value is, the lower its energy level is.
 
 Column {.tabset data-width=30%}
 -------------------------------------------------
@@ -279,7 +279,7 @@ Column {.tabset data-width=30%}
 ### Jimi Henrix: Graph
 
 ```{r jimiHendrix1, echo=FALSE}
-p <- ggplot(elecLadylandFeatures, aes(x = tempo, y = energy, size = valence, color = mode)) + geom_point() + ggtitle("Electric Ladyland")
+p <- ggplot(elecLadylandFeatures, aes(x = tempo, y = energy, size = valence, color = loudness)) + geom_point() + ggtitle("Electric Ladyland")
 ggplotly(p)
 ```
 
@@ -287,7 +287,7 @@ ggplotly(p)
 
 In Jimi Hendrix's album, Electric Ladyland, it is important to note that the track "Moon, Turn the Tides... Gently Gently Away" lies outside the general range of all values of other songs. This is because it is an interlude song within the album, and its purpose was to connect the tracks "1983... (A Merman I Should Turn to Be)" and "Still Raining, Still Dreaming".
 
-Electric Ladyland also follows a typically fast BPM, but it is more moderato than allegro. It's median is at 113.19 BPM, which falls into the moderate range of beats in music. It also has a median valence value of 0.54 and median energy level of 0.81, indicating that it is a relatively loud and fast album despite also being neutral in terms of musical positivity. It also uses major scales for most of its songs. 
+Electric Ladyland also follows a typically fast BPM, but it is more moderato than allegro. It's median is at 113.19 BPM, which falls into the moderate range of beats in music. It also has a median valence value of 0.54 and median energy level of 0.81, indicating that it is a relatively loud and fast album despite also being neutral in terms of musical positivity. It also uses major scales for most of its songs.In addition, the correlation between loudness and energy levels can clearly be seen. The louder the song is, the higher its energy level is. 
 
 Column {.tabset data-width=30%}
 -------------------------------------------------
@@ -299,6 +299,8 @@ The two scatterplots shown on the left represent the relationship between each a
 In general, the two albums are actually very similar in the four factors involved. They both had very similar median values for tempo, valence, and energy, and both used mainly major scales. Electric Ladyland had a slightly slower tempo (a difference of 11.92 BPM between the medians), but it also has a slightly higher energy and valence level (a difference of 0.09 in valence and 0.07 in energy). 
 
 This was interesting to me because I had thought that a faster tempo is often correlated with more energy, as fast music often brings people to dance and closer to experiencing positivity. However, when examining these two albums, it seems like Currents had a quicker tempo but remained relatively neutral in inducing emotions in its audience, while The Burning of the Midnight Lamp had a slower tempo but was able to bring out more in its listeners. 
+
+Both albums also have the same positive correlation between loudness and energy levels. The songs that have the most energy are also often the loudest. They also often have a tempo that is neither too fast or too slow -- in this case, around 125 BPM. 
 
 Key Histograms {data-orientation=rows data-navmenu=Track-Level\ Analysis}
 ===================================================
@@ -403,7 +405,7 @@ The chromagram for Tame Impala's top hit, "The Less I Know The Better", is compu
 
 ### "The Buring of the Midnight Lamp" Analysis
 
-The chromagram for Jimi Hendrix's top hit, "The Burning of the Midnight Lamp", is also computed with Euclidean distance. Compare to "The Less I Know The Better", this chromagram displays much less variation across the use of pitches. Jimi Hendrix mostly focused on pitches F, E, D, and C; the overlap of segments of these pitches suggest that he tried to focus on harmony rather than alternating sequences of instruments. This is also supported by instances where magnitudes of these pitches spike together. For example, around 70sec and 150sec, pitches F and C both show a high magnitude that last about 5-7 seconds. They also correspond to the beginning of the two intense guitar solos during the song, showing how much Hendrix places emphasis on creating harmonies between the drums and the guitar. 
+The chromagram for Jimi Hendrix's top hit, "The Burning of the Midnight Lamp", is also computed with Euclidean distance. Compared to "The Less I Know The Better", this chromagram displays much less variation across the use of pitches. Jimi Hendrix mostly focused on pitches F, E, D, and C; the overlap of segments of these pitches suggest that he tried to focus on harmony rather than alternating sequences of instruments. This is also supported by instances where magnitudes of these pitches spike together. For example, around 70sec and 150sec, pitches F and C both show a high magnitude that last about 5-7 seconds. They also correspond to the beginning of the two intense guitar solos during the song, showing how much Hendrix places emphasis on creating harmonies between the drums and the guitar. 
 
 Self-Similarity Matrices {data-navmenu=Top\ Hit\ Analysis}
 ==============================================================================
@@ -734,7 +736,7 @@ Column
 <!-- ggplotly(tlikplot) -->
 <!-- ``` -->
 
-### "The Less I Know The Better" {data-height=50%}
+### "The Less I Know The Better" {data-height=600}
 
 ```{r tameImpala7, echo=FALSE}
 tlik <- get_tidy_audio_analysis(tlikID)
@@ -748,7 +750,7 @@ tlik |>
   theme_classic()
 ```
 
-### "The Burning of the Midnight Lamp" {data-height=50%}
+### "The Burning of the Midnight Lamp" {data-height=600}
 
 ```{r jimiHendrix7, echo=FALSE}
 boml <- get_tidy_audio_analysis(bomlID)
@@ -826,13 +828,23 @@ Clustering
 Column
 ---------------------------------------------------
 
+### Analysis
 
-Column
+I also wanted to compare Tame Impala and Jimi Hendrix's albums by using models to see how they would be grouped together. Therefore, I created a dendrogram using complete linking on a playlist that combined *Currents* and *Electric Ladyland* to identify possible clusters as well as possible outliers. 
+
+As one can see in the graph to the right, there are clearly two outliers that do not belong to any of the clusters: "Gossip" by Tame Impala and "Moon, Turn the Tides... Gently Gently Away" by Jimi Hendrix. This is because both are purely instrumental with no speech involved, and they both are experimental tracks that involves more electronic activity to create a distinct and otherworldly atmosphere. "Gossip" is a track that stands out from the other songs on the playlist because it is a short and dreamy interlude with no discernible lyrics, while the other songs on the playlist are either upbeat or have distinct vocal melodies and lyrics. It also uses a lot of reverb and panning to drag out the spaciousness in its atmosphere. On the other hand, "Moon, Turn the Tides...Gently Gently Away" is a psychedelic instrumental track that stands out because it is much longer and more experimental than the other tracks. The song is over 12 minutes long and features extensive use of distortion and feedback, creating a more chaotic and improvisational sound than the other songs on the playlist. It also features Jimi Hendrix's guitar riffs that drag the audience into another world. 
+
+The hierarchical clustering is interesting to me because the rest of the songs basically all belong to one cluster after excluding the two outliers. This can be see if you count three levels from the top of the tree -- at the third level, the cluster forms includes all of the songs except for "Gossip" and "Moon, Turn the Tides... Gently Gently Away". Looking at the heatmap, most of the songs are very similar across all attributes according to values calculated by Spotify. The only two songs that have significant different values are the two outliers that I have discussed, further showing how they might be different from the rest of the songs. In addition, the huge cluster of the rest of the playlist also shows that Spotify would consider these two albums as fairly similar to each other and would classify them together. 
+
+
+Column 
 ---------------------------------------------------
+
+### Dendrogram
 
 ```{r tameImpala8, echo=FALSE}
 ti <-
-  get_playlist_audio_features("tameimpala", "37i9dQZF1DZ06evO3n0Aus") |>
+  get_playlist_audio_features("tameimpala", "5VK2XNDMxUDZXG081cNPFL") |>
   add_audio_analysis() |>
   mutate(
     segments = map2(segments, key, compmus_c_transpose),
@@ -882,12 +894,45 @@ tiFeatures <-
 tiDistance <- dist(tiFeatures, method = "euclidean")
 
 tiDistance |> 
-  hclust(method = "complete") |> # Try single, average, and complete.
+  hclust(method = "single") |> # Try single, average, and complete.
   dendro_data() |>
   ggdendrogram()
+```
 
+### Heatmap
+
+```{r heatmap, echo=FALSE}
+heatmaply(
+  tiFeatures,
+  hclustfun = hclust,
+  hclust_method = "complete",  # Change for single, average, or complete linkage.
+  dist_method = "euclidean"
+)
 ```
 
 Conclusion
 ===================================================
 
+Column
+---------------------------------------------------
+
+### Compare and Contrast
+
+As we are nearing the end of this corpus, I just wanted to do a quick recap of everything that I've covered and analyze the similarities and differences between the two artists. In general, Tame Impala and Jimi Hendrix belong to the same category of psychedelic rock; as we can see from using clustering and classification methods to generate dendrograms and heatmaps, the majority of the songs in their two albums are on a par with each other. They also have generally similar tempo, valence, and energy values, with Electric Ladyland having a slower tempo.As we dove deeper, we can see elements that contributed to the individual psychedelic components of the songs. Using the key histograms, we see that both artists chose keys that would trigger a certain feeling in their audience to contribute to the dream-like qualities surrounding their music. 
+
+When I analyzed their top tracks, "The Less I Know The Better" and "The Burning of the Midnight Lamp", I began to see slight differences in how they carry out their music. From the chromagrams and self-similarity matrices, I can tell that "The Less I Know The Better" put a lot of emphasis on the repetition of a four-chord sequence throughout the entire song. His psychedelic qualities came from stacking layers of other instruments and lyrics on top of that -- the bassline, the use of guitar, and variations of synth parts. "The Less I Know The Better" also maintained a steady tempo throughout the entire song in addition to the consistent chord patterns. This shows that the song put a lot of emphasis on creating harmony between various layers as well as creating a more straightforward progression with a few unexpected twists.
+
+On the other hand, "The Burning of the Midnight Lamp" is quite the opposite. Jimi Hendrix focused a lot on producing a complex and unpredictable series of changes throughout the song. This includes a wide range of chord progressions, tempos, and insertions of different guitar riffs between every section. Jimi Hendrix not only wants to keep his fans on their toes, but he also wants them to listen to the song as if it was a story. Although there were harmonies, there was more emphasis on using guitar to bring out the classical rock in the song. This results in a more raw and organic feel with a lot of experimentation in the studio, rather than "The Less I Know The Better"'s polished and electronic atmosphere. As a result, it's evident that these two top hits bring out different sides of psychedelic rock.
+
+Column
+---------------------------------------------------
+
+### Ending Thoughts
+
+Completing this corpus has allowed me to learn so much, from technical knowledge in musicology to using R to build a markdown page. Before this class, I have never touched anything in musicology; while I listen to music on a daily basis, I never had the chance to dive into the theoretical parts of it and understand what makes up the composition of music. I started this class with 0 knowledge and didn't even know the difference between chords and keys. However, I knew that I wanted to analyze my favorite genre, psychedelic rock, and understand the differences between two of my favorite artists.
+
+Creating this corpus has taught me how to extract specific information from some of my favorite songs. For example, I learned that the reason that "The Less I Know The Better" is so mesmerizing is because of its repetition of the same four chords as well as how many layers of instruments it has to create the harmony. On the other hand, "The Burning of the Midnight Lamp" is less organized, and it's meant to use its guitar riffs to drag its audience into the other world.
+
+These conclusions can benefit any other person that wants to learn about the difference between the two songs or the two albums analyzed. Although it does not cover the artists in general, it can help others learn about what exactly differs between the two songs, thus offering insight to allow them to start their own research. Or, it can also provide information about the composition of either of the two songs, as I've analyzed them in this corpus.
+
+Overall, I really enjoyed creating this project from scratch, and I can bring these skills to future projects if I want to analyze some of my other favorite songs! 
